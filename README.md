@@ -8,6 +8,9 @@ Encyclopedia for **Monster Rancher 4** (PS2, Tecmo 2003): monsters, techniques, 
 - Event delegation on `document`; scroll position kept on re-render; detail views are a stacked overlay with Back.
 - `localStorage` key `mr4c.state` = current tab, search text, filters.
 - GitHub Pages from `main` at `/`; `.nojekyll` must stay at the root.
+- Cache busting (rule A-cache-bust): every local script / stylesheet in `index.html` carries `?v=<content hash>`,
+  stamped by the shared `../tools/app/stamp_cache.py` from `tools/build_data.py` and from `.githooks/pre-commit` on
+  every commit. Once per clone: `git config core.hooksPath .githooks`. Never commit with `--no-verify`.
 
 ## Data
 `python tools/build_data.py --strict` regenerates `data/data.js` and `assets/mon/` from the local-only datamine
