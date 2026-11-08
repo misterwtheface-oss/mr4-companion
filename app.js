@@ -3,7 +3,10 @@
   const D = window.MR4_DATA;
   // bosses: the 5 special-main monsters (King Shiden, Don Mudleone, Garp, Zevion x2) are not obtainable by the player
   // (never from a disc, no Book route, pure only, boss-like records; extract 05_summon § 1.7)
-  const FEATURES = { bosses: false };
+  // npcs: 7 normal-breed monsters the player cannot get, marked by flat 100 base stats (Dodon, Ceralino, Ayatea,
+  // Millielle, Balbalo, JackInTheCho, Spartacus; all on the never-from-a-disc list, extract 05_summon § 1.5); kept in data
+  const FEATURES = { bosses: false, npcs: false };
+  const isNpc = (s) => STATS.every((x) => s.base[x] === 100);
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const by = (arr) => Object.fromEntries(arr.map((x) => [x.id, x]));
@@ -20,7 +23,7 @@
 
   // monsters per main breed: pure breed first, then by sub breed
   const members = {};
-  D.species.forEach((s) => (members[groupOf(s)] ||= []).push(s));
+  D.species.filter((s) => FEATURES.npcs || !isNpc(s)).forEach((s) => (members[groupOf(s)] ||= []).push(s));
   Object.values(members).forEach((l) => l.sort((a, b) =>
     (b.sub === b.main) - (a.sub === a.main) || (a.sub ?? 99) - (b.sub ?? 99) || a.id - b.id));
   const pureOf = (k) => (k === APE ? members[APE][0] : members[k].find((s) => s.sub === s.main));

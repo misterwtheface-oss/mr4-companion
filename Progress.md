@@ -40,6 +40,9 @@
   framing fixes and the untextured-part fix (extract APP.md § 3D monster renders); app crops to the model, keeps the
   shadow inside that box (CSS shadows removed). Apes get their own "Ape" entry after Garu (Ape technique names and
   pictures, Garu's technique stats; code-backed). The 5 special-main monsters are bosses: hidden (FEATURES.bosses).
+- 2026-11-08 (NPCs): 7 normal-breed monsters the player cannot get (flat 100 base stats: Dodon, Ceralino, Ayatea,
+  Millielle, Balbalo, JackInTheCho, Spartacus; all on the extract's never-from-a-disc list, 05_summon § 1.5) are
+  hidden by FEATURES.npcs (app.js); still in data.js.
 
 ## Open
 Backlog (user, 2026-11-08):
@@ -70,6 +73,8 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] NPC filter: flat-100 normal-breed monsters hidden behind FEATURES.npcs (user request; data kept).
+  Checked by page dump: Pixie / Golem / Hare / Durahan / Pancho / Ripper lists lose exactly those 7.
 - 2026-11-08 [mr4.app] Lit renders shipped (live 070ebe1). What changed and why: task MR4_rerender_lit rendered all
   335, but its app build died on one transient WebP encode error (item 290, memory right after Blender), so nothing was
   committed; re-ran MR4_app_build (0 errors), checked at phone width, pushed; fixed rerender_lit.cmd (lost its folder
