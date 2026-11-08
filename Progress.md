@@ -7,7 +7,17 @@
   "no render". Live 2026-11-08: https://misterwtheface-oss.github.io/mr4-companion/ (Pages from main, auto-deploys on
   push; Cloudflare beacon not added until public release).
 
+- 2026-11-08 (later): layout rebuilt to the user's spec: the main page is a grid of the game's breed faces (res 0x8A,
+  33 breeds + "?" for Special); tapping one opens the breed overlay (URL #b/<id>, phone Back closes it) with a
+  Monsters / Breed toggle. Monsters = one row each (base stat + growth grade per stat); Breed = what all members
+  share (monster type, technique list). The old Techniques / Items / Tournaments tabs are gone from the layout (the data
+  stays in data.js for later features).
+
 ## Open
+- [ ] Per-monster extras (user decides what to show): traits, favourite items, likes / dislikes by food and item
+      category (species.json food_cat / item_cat, not yet in data.js), like levels (battles, rest), personality odds
+      (mix of main and sub breed tables). Personality names and food-category names still need decoding.
+- [ ] Breed face draw site not traced (extract REQUESTS); faces are art-matched to breed ids.
 - [x] Item pictures: 498 item renders (item id -> model file 0x247 + id) in lists and detail; Envelopes / "(NONE)"
       have no model. Re-render: `_mr4_extract/tools/item_renders.py all` (task MR4_item_renders).
 - [x] Icons: technique pictograms (lists, detail, monster technique chips; Ape variants use their own set), element

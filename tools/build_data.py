@@ -92,8 +92,8 @@ def main():
         if not os.path.exists(src):
             errors.append(f"icon source missing: {rel}")
             return None
-        dst = "assets/icon/" + rel.replace("ui/ui_", "ui/").replace("waza/set", "waza/")
-        if images:
+        dst = "assets/icon/" + rel.replace("ui/ui_", "ui/").replace("waza/set", "waza/").replace("breed/face_", "breed/")
+        if True:   # icons are small: copied on every build, --no-images included
             os.makedirs(os.path.dirname(os.path.join(APP, dst)), exist_ok=True)
             Image.open(src).save(os.path.join(APP, dst), optimize=True)
         shipped.append(dst)
@@ -102,6 +102,11 @@ def main():
     elements = [{"id": e["id"], "name": e["name"], "icon": icon(e["icon"])} for e in im_map["elements"]]
     categories = [{"id": c["id"], "icon": icon(c["icon"])} for c in im_map["categories"]]
     mon_types = [{"id": t["id"], "name": t["label"], "icon": icon(t["icon"])} for t in im_map["monster_types"]]
+    # breed faces (res 0x8A, art-matched by id); "?" face 38 stands for the special monsters with no main breed
+    breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["icon"])} for b in im_map["breeds"]]
+    if [b["id"] for b in breeds] != [b["id"] for b in d["breeds"]]:
+        errors.append("icon_map breeds do not cover every breed")
+    special_icon = icon(next(f["icon"] for f in im_map["extra_faces"] if f["tex"] == 38))
     ranges = {int(k): v for k, v in im_map["texts"]["technique_range"].items()}
     tech_icon = {t["id"]: t for t in im_map["techniques"]}
 
@@ -200,8 +205,9 @@ def main():
     out = {
         "meta": {"game": d["meta"]["game"], "status": d["meta"]["status"],
                  "source": d["meta"]["generatedAt"], "stats": STATS, "statNames": d["meta"]["statNames"],
-                 "elements": elements, "categories": categories, "monTypes": mon_types, "ranges": ranges},
-        "breeds": d["breeds"],
+                 "elements": elements, "categories": categories, "monTypes": mon_types, "ranges": ranges,
+                 "specialIcon": special_icon},
+        "breeds": breeds,
         "species": species,
         "techniques": techniques,
         "traits": [{k: t[k] for k in ("id", "name", "desc")} for t in d["traits"]],

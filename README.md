@@ -5,8 +5,9 @@ Encyclopedia for **Monster Rancher 4** (PS2, Tecmo 2003): monsters, techniques, 
 ## Architecture
 - Vanilla JS, no framework, no build step for the app: `index.html` + `styles.css` + `app.js`.
 - `data/data.js` sets `window.MR4_DATA` (a global script, not fetched JSON, so it runs on `file://` and GitHub Pages).
-- Event delegation on `document`; scroll position kept on re-render; detail views are a stacked overlay with Back.
-- `localStorage` key `mr4c.state` = current tab, search text, filters.
+- Main page = breed face grid; a face opens the breed overlay (`#b/<breed id>`, `#b/x` = Special) with a toggle
+  between the monster rows and the breed-wide data. Event delegation on `document`.
+- `localStorage` key `mr4c.state` = which side of the overlay toggle was last used.
 - GitHub Pages from `main` at `/`; `.nojekyll` must stay at the root.
 - Cache busting (rule A-cache-bust): every local script / stylesheet in `index.html` carries `?v=<content hash>`,
   stamped by the shared `../tools/app/stamp_cache.py` from `tools/build_data.py` and from `.githooks/pre-commit` on
@@ -21,7 +22,8 @@ Encyclopedia for **Monster Rancher 4** (PS2, Tecmo 2003): monsters, techniques, 
 Image resizing uses Lanczos (no AI upscalers). The full image pass took ~20 min on 2026-11-08 (PC busy): run it
 through Task Scheduler; `--no-images` rebuilds data.js alone in seconds.
 
-Icons and item pictures come from the extract's code-backed icon map (`_mr4_extract/tools/icon_map.py`, extract
+Breed faces are the game's own icons (MF4_DB res 0x8A, extract APP.md § Icon map), copied with the other icons on
+every build, `--no-images` included. Icons and item pictures come from the extract's code-backed icon map (`_mr4_extract/tools/icon_map.py`, extract
 APP.md § Icon map): technique pictograms (breed set + slot; the three Ape variants use their own set), element,
 category and monster type icons, range names. Items are 3D models in the game, so item pictures are our renders
 (`_mr4_extract/tools/item_renders.py`, task MR4_item_renders); the 2 Envelopes and the "(NONE)" fillers have no model.
