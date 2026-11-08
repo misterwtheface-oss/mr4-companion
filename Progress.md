@@ -56,9 +56,7 @@ Backlog (user, 2026-11-08):
       words per trait (extract 01_monster § 4.4, 03_battle).
 - [x] Technique panels drawn like the game's: layouts 20 / 21 rebuilt from their parts (State, 2026-11-08 game panels).
 - [x] Breed emblems inside the game's UI container: res 0x8B backdrop + Mon info name plate / breed row.
-- [ ] Bring back the per-stat modifier next to the grade (old monster page "Growth" column, species growthMod -8..8,
-      = 2 x (grade - 5) on 97% of records; meaning not decoded: battle / training handoff, extract 01_monster var
-      0x34-0x39). Decide its label once the meaning is known.
+- [x] Per-stat modifier shown (column Mod): swing of the training gain roll (extract MONSTER_DATA.md § Growth).
 - [ ] Per-monster extras (user decides what to show): traits, favourite items, likes / dislikes by food and item
       category (species.json food_cat / item_cat, not yet in data.js), like levels (battles, rest), personality odds
       (mix of main and sub breed tables). Personality names and food-category names still need decoding.
@@ -70,7 +68,8 @@ Backlog (user, 2026-11-08):
       have no model. Re-render: `_mr4_extract/tools/item_renders.py all` (task MR4_item_renders).
 - [x] Icons: technique pictograms (lists, detail, monster technique chips; Ape variants use their own set), element
       icon + name, category icon, range, monster type badge. Rank icons are mapped (icon_map.json) but not used yet.
-- [ ] Stat grade scale and growth type meaning: shown as raw numbers.
+- [x] Grade shown with its training-gain % (growthPct, traits applied); growth type named by the peak of its age curve
+      (Early / Early-mid / Normal / Mid-late / Late / Steady; names are ours, the game shows none) + lifespan.
 - [ ] Book routes: real album titles for discs; "From Book" stat generation (extract REQUESTS / 05_summon Q5).
 - [ ] Planner features (raising, combining) after the encyclopedia.
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
@@ -79,6 +78,8 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Monster rows: per stat Base / bar / Growth grade + gain % / Mod, plus Lifespan and growth type
+  (user ask). growthPct built in tools/build_data.py from res 0x49 + 0x08 and trait effects 10-16. Open: nothing new.
 - 2026-11-08 [mr4.app] Group skills hidden (FEATURES.groupSkills): the 4 picture-less techniques per breed (slots 12+)
   are group / special attacks, not comparable with the core 12; bar scale now from the core 12 only (Life Damage top 66 -> 62,
   Accuracy 100 -> 63). Data kept.

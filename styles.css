@@ -53,7 +53,7 @@ main { padding: 12px 10px; }
 .seg button.on { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
 .sheet-body { flex: 1; overflow-y: auto; padding: 0 12px 24px; border-top: 1px solid var(--line); }
 
-/* monster rows: picture at full row height, then per stat: label, base, magnitude bar, growth grade */
+/* monster rows: picture at full row height, then per stat: label, base, magnitude bar, growth grade, gain %, modifier */
 .mlist { display: flex; flex-direction: column; }
 .mrow { padding: 8px 0; border-bottom: 1px solid var(--line); }
 .mrow-h { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
@@ -72,7 +72,7 @@ main { padding: 12px 10px; }
 .mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px);
   object-fit: contain; object-position: 50% 100%; }   /* lit renders carry their own cast + ground shadow */
 .mrow-m { flex: 1; min-width: 0; }
-.mstats { display: grid; grid-template-columns: auto auto 1fr auto; gap: 2px 7px; align-items: center;
+.mstats { display: grid; grid-template-columns: auto auto 1fr auto auto auto; gap: 2px 6px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }
 .mstats > i { font-style: normal; font-size: 11px; color: var(--dim); letter-spacing: .04em; }
 .mstats > b { font-weight: 600; text-align: right; }
@@ -86,6 +86,13 @@ main { padding: 12px 10px; }
 /* growth grade 1..9: higher grows faster */
 .g.g7, .g.g8, .g.g9 { color: var(--gold-hi); font-weight: 700; }
 .g.g1, .g.g2, .g.g3 { color: var(--bad); }
+.mstats > .h { font-size: 10px; text-align: right; }
+.mstats > .h:nth-child(4) { grid-column: span 2; text-align: center; }
+.mstats .gp { min-width: 4.2ch; text-align: right; font-size: 12px; color: var(--dim); }
+.mstats .gp.up { color: var(--gold-hi); } .mstats .gp.dn { color: var(--bad); }
+.mstats .gm { min-width: 2.5ch; text-align: right; font-size: 12px; color: var(--steel); }
+.mmeta { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 5px; font-size: 12px; }
+.mmeta i { font-style: normal; font-size: 11px; color: var(--dim); margin-right: 3px; }
 
 /* breed view */
 .sec { margin-top: 12px; }
