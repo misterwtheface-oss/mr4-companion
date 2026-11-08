@@ -15,27 +15,17 @@ button { font: inherit; color: inherit; }
 .top h1 { margin: 0; font-size: 17px; letter-spacing: .04em; color: var(--bronze); }
 main { padding: 12px 10px; }
 
-/* game panels: background = the game's layout parts at 1 panel pixel per texel (extract tools/layouts.py);
-   .at boxes are placed in panel pixels (percent), text size --fs is in panel pixels via container width */
-.pnl { position: relative; width: 100%; max-width: calc(var(--pw) * 2px); container-type: inline-size; }
-.pnl-bg { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
-.pnl .at { position: absolute; display: flex; align-items: center; margin: 0; padding: 0; border: 0; background: none; }
-.pnl .at > img { width: 100%; height: 100%; }
-.pnl .at.mid { justify-content: center; }
-.pnl .at.end { justify-content: flex-end; }
-.pnl .face { image-rendering: auto; }   /* the game shrinks the 48x48 faces (to 30 / 32 px) with filtering */
-.pnl .waza, .pnl .cursor img { image-rendering: pixelated; }
-.gt { font-size: calc(var(--fs) / var(--pw) * 100cqw); font-weight: 800; line-height: 1; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; letter-spacing: .02em;
-  background: linear-gradient(var(--c1) 30%, var(--c2)); -webkit-background-clip: text; background-clip: text;
-  color: transparent; filter: drop-shadow(0 0 .5px #000) drop-shadow(0 1px 0 #000); }
-.gt.flat { filter: none; }
+/* breed emblem = the game's face on its blue disc + gold ring (48x48 art; whole-number sizes stay crisp) */
+.emb { width: 48px; height: 48px; image-rendering: pixelated; flex: none; }
+.emb.sm { width: 40px; height: 40px; image-rendering: auto; }
 
-/* main page: one emblem per main breed, on the Mon info name plate */
-.emblems { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 8px; }
-.emblem { min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; }
-.emblem .pnl { max-width: none; }
-.emblem:active .pnl { filter: brightness(1.25); }
+/* main page: one emblem per main breed */
+.emblems { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 14px 8px; }
+.emblem { min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; text-align: center; }
+.emblem .emb { width: 96px; height: 96px; max-width: 100%; }
+.emblem b { display: block; margin-top: 2px; font-size: 13px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emblem:active .emb { filter: brightness(1.25); }
 .noimg { display: grid; place-items: center; color: var(--dim); }
 
 /* breed overlay */
@@ -56,7 +46,15 @@ main { padding: 12px 10px; }
 /* monster rows: picture at full row height, then per stat: label, base, magnitude bar, growth grade */
 .mlist { display: flex; flex-direction: column; }
 .mrow { padding: 8px 0; border-bottom: 1px solid var(--line); }
-.mrow .pnl-breedrow { max-width: calc(var(--pw) * 1.5px); margin-bottom: 4px; }
+.mrow-h { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.mrow-h > b { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* main x sub: a gold "x" between the emblems, after the game's breed-row mark */
+.pair { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.x { position: relative; width: 16px; height: 16px; }
+.x::before, .x::after { content: ''; position: absolute; left: 50%; top: 50%; width: 18px; height: 5px; border-radius: 2px;
+  background: linear-gradient(#ffe27a, #d9a21b 55%, #8a5a00); box-shadow: 0 0 0 1px #3a2400;
+  transform: translate(-50%, -50%) rotate(45deg); }
+.x::after { transform: translate(-50%, -50%) rotate(-45deg); }
 .mrow-b { display: flex; gap: 10px; align-items: stretch; }
 .mrow-pic { flex: none; width: 124px; position: relative; }   /* stats set the row height; picture fills it */
 .mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
@@ -66,7 +64,11 @@ main { padding: 12px 10px; }
 .mstats > i { font-style: normal; font-size: 11px; color: var(--dim); letter-spacing: .04em; }
 .mstats > b { font-weight: 600; text-align: right; }
 .bar { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; }
-.bar i { display: block; height: 100%; background: var(--teal); }
+.bar i { display: block; height: 100%; background: var(--c, var(--teal)); }
+/* stat colours from the game's Monster Data labels (SKI = the game's ACC.) */
+.s-POW { --c: #e0704f; } .s-LIF { --c: #e8961a; } .s-INT { --c: #52bf43; }
+.s-SKI { --c: #e062c2; } .s-DEF { --c: #7484e6; } .s-SPD { --c: #5fd2d2; }
+.mstats > i[class^="s-"] { color: var(--c); font-weight: 700; }
 .mstats .g { min-width: 1ch; text-align: right; color: var(--steel); }
 /* growth grade 1..9: higher grows faster */
 .g.g7, .g.g8, .g.g9 { color: var(--teal); font-weight: 700; }
@@ -75,29 +77,50 @@ main { padding: 12px 10px; }
 /* breed view */
 .sec { margin-top: 12px; }
 .sec h3 { margin: 0 0 6px; font-size: 13px; color: var(--bronze); letter-spacing: .05em; text-transform: uppercase; }
-/* technique page: Skills grid, then the detail box + rank boxes (side by side when there is room) */
-.waza-page .pnl-skills { max-width: calc(var(--pw) * 1.6px); }
-.pnl .hit { cursor: pointer; }
-.pnl .cursor { pointer-events: none; }
-.pnl .cursor.off { display: none; }
-.xtechs { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+/* techniques: the game's pictograms in slot order (4 x 3), detail card for the selected one */
+.wgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 96px)); grid-template-rows: repeat(3, auto); gap: 6px; }
+.wcell { padding: 3px; border: 2px solid transparent; border-radius: 6px; background: none; cursor: pointer; line-height: 0; }
+.wcell.on { border-color: var(--teal); box-shadow: 0 0 8px rgba(95, 224, 208, .45); }
+.waza { width: 100%; height: auto; aspect-ratio: 3 / 2; image-rendering: pixelated; display: block; }
+.xtechs { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .xtechs:empty { display: none; }
-.xtech { padding: 4px 10px; border-radius: 999px; border: 1px solid #c79a2a; background: #2a2a2a; color: var(--text);
+.xtech { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--text);
   font-size: 13px; cursor: pointer; }
-.xtech.on { background: #c79a2a; color: #1a1200; font-weight: 600; }
-.tdetail { display: flex; flex-wrap: wrap; gap: 4px; }
-.tdetail .pnl-techinfo { max-width: calc(var(--pw) * 1.6px); }
-.tdetail .pnl-techranks { max-width: calc(var(--pw) * 1.6px); }
+.xtech.on { border-color: var(--teal); color: var(--teal); font-weight: 600; }
+.tcard { margin-top: 8px; padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
+.tc-h { display: flex; align-items: center; gap: 10px; }
+.tc-h .waza { width: 72px; flex: none; }
+.tc-n { flex: 1; min-width: 0; }
+.tc-n > b { font-size: 16px; }
+.tc-m { display: flex; gap: 10px; margin-top: 2px; font-size: 12px; font-weight: 700; }
+/* type / range text in the game's two-colour gradients */
+.tt { --c1: #fff; --c2: #fff; background: linear-gradient(var(--c1) 35%, var(--c2)); -webkit-background-clip: text;
+  background-clip: text; color: transparent; }
+.t-pow { --c1: #f0d840; --c2: #40d450; } .t-int { --c1: #40d450; --c2: #78ec80; }
+.tc-i { display: inline-flex; gap: 4px; flex: none; }
+.tc-i .ico { width: 28px; height: 28px; }
+.tc-s { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 6px; font-size: 13px; color: var(--dim); }
+.tc-s b { color: var(--text); font-weight: 600; }
+/* rate rows: label, magnitude bar (share of the largest value of that stat), raw value, the game's rank letter */
+.rates { display: grid; grid-template-columns: auto 1fr 2.5ch 26px; gap: 4px 8px; align-items: center;
+  font-variant-numeric: tabular-nums; font-size: 13px; }
+.rates > i { font-style: normal; font-weight: 700; color: var(--c); white-space: nowrap; }
+.rates > b { text-align: right; font-weight: 600; }
+.rates > img { width: 26px; height: 26px; image-rendering: pixelated; }
+.rates .bar { height: 8px; }
+/* the game's rate label colours (Life Damage red, Guts Damage cyan, Critical yellow, Accuracy magenta) */
+.r-life { --c: #e83a3a; } .r-guts { --c: #22b8a8; } .r-crit { --c: #d8cf3a; } .r-acc { --c: #d8459e; }
 .ico { width: 20px; height: 20px; vertical-align: middle; }
 .badge { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
 .iv { display: inline-flex; align-items: center; white-space: nowrap; }
 
 @media (min-width: 720px) {
   .top, main { padding-left: max(16px, calc(50% - 560px)); padding-right: max(16px, calc(50% - 560px)); }
-  .emblems { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px 12px; }
+  .emblems { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px 12px; }
+  .waza-page { display: grid; grid-template-columns: auto 1fr; gap: 0 16px; align-items: start; }
+  .waza-page > h3 { grid-column: 1 / -1; }
+  .waza-page .tdetail { grid-column: 2; grid-row: 2 / span 2; }
+  .waza-page .tcard { margin-top: 0; }
   .overlay { align-items: center; justify-content: center; }
   .sheet { width: min(860px, 94vw); height: 88vh; border: 2px solid var(--bronze); border-radius: 14px; }
-  /* the game's row: info box and rank boxes side by side, widths in the game's proportion */
-  .tdetail { flex-wrap: nowrap; gap: 0; }
-  .tdetail .pnl-techinfo, .tdetail .pnl-techranks { flex: var(--pw) 1 0; max-width: none; }
 }

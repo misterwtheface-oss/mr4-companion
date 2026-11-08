@@ -6,13 +6,13 @@ Reads  ../_mr4_extract/web/data.js            (window.MR4_DATA, tools/build_data
        ../_mr4_extract/assets/renders/mr4/    (<species>_<Name>_35.png, 512 px 3/4 view, xgame_renders.py)
        ../_mr4_extract/data/assets/icon_map.json + assets/icons/   (code-backed icon map, tools/icon_map.py)
        ../_mr4_extract/assets/renders/mr4_items/  (<id>_<Name>_35.png, tools/item_renders.py)
-       ../_mr4_extract/data/assets/ui_panels.json + assets/icons/panel/   (game UI panels, tools/layouts.py export)
+       ../_mr4_extract/data/assets/ui_panels.json + assets/icons/panel/   (rank letters + rank table, tools/layouts.py export)
 Writes data/data.js                           (window.MR4_DATA, only the fields the app reads)
        assets/mon/<species>.webp              (detail image, 384 px)
        assets/mon/s/<species>.webp            (list thumbnail, 96 px)
        assets/item/<id>.webp, assets/item/s/<id>.webp   (item render, 256 / 64 px)
        assets/icon/waza/<set>_<slot>.png, assets/icon/ui/<tex>.png   (technique pictograms; element / category / type icons)
-       assets/icon/panel/<name>.png           (panel backgrounds composed from the game's layout parts, rank letters)
+       assets/icon/panel/rank_<E..S>.png      (the game's rank letters)
 
 Every image carries a provenance tag in data.js (`img`: "render:<file>" or "none:<reason>"); there is no fallback image.
 --strict fails the build on any error: a reachable species without a render, a render whose name differs from the
@@ -128,10 +128,9 @@ def main():
     ranges = {int(k): v for k, v in im_map["texts"]["technique_range"].items()}
     tech_icon = {t["id"]: t for t in im_map["techniques"]}
 
-    # game UI panels (extract APP.md § UI layouts): backgrounds + content boxes in panel pixels
+    # rank letters E..S (UI tex 0xD1 - rank) and the cmn_waza_rank table (extract APP.md § UI layouts)
     up = json.load(open(UI_PANELS, encoding="utf-8"))
-    panels = {k: {"img": icon(v["png"]), "w": v["w"], "h": v["h"], "slots": v["slots"]} for k, v in up["panels"].items()}
-    panel_tex = {k: icon(v["png"]) for k, v in up["tex"].items()}
+    rank_icons = {r: icon(up["tex"]["rank_" + r]["png"]) for r in "EDCBAS"}
     wr = up["waza_rank"]
 
     def waza_rank(col, v):   # DB_CsvFindRow: first row r with t[r+1][col] > v, else the last row; 0..5 = E..S
@@ -240,7 +239,7 @@ def main():
         "meta": {"game": d["meta"]["game"], "status": d["meta"]["status"],
                  "source": d["meta"]["generatedAt"], "stats": STATS, "statNames": d["meta"]["statNames"],
                  "elements": elements, "categories": categories, "monTypes": mon_types, "ranges": ranges,
-                 "specialIcon": special_icon, "panels": panels, "panelTex": panel_tex,
+                 "specialIcon": special_icon, "rankIcons": rank_icons,
                  "texts": {"pow": msg_db[0x85], "int": msg_db[0x86], "guts": msg_db[0x4D], "effects": msg_db[0x4E],
                            "skills": msg_db[0x4B]}},
         "breeds": breeds,

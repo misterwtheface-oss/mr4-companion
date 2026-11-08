@@ -30,32 +30,12 @@
     ? `<img src="${s.pic[small ? 1 : 0]}" alt="" loading="lazy">`
     : '<div class="noimg">?</div>';
   const ico = (src, cls = 'ico', title = '') => src ? `<img class="${cls}" src="${src}" alt="${esc(title)}" title="${esc(title)}">` : '';
-  // ---- game panels: backgrounds composed from MR4's own layout parts (extract tools/layouts.py), content placed in
-  // the boxes where the game draws it; sizes are panel pixels, so everything scales with the panel width ----
-  const PN = D.meta.panels, PT = D.meta.panelTex, TX = D.meta.texts;
-  const pc = (v, t) => `${(v / t * 100).toFixed(3)}%`;
-  const panel = (name, inner, cls = '') => `<div class="pnl pnl-${name} ${cls}" style="--pw:${PN[name].w};aspect-ratio:${PN[name].w}/${PN[name].h}">` +
-    `<img class="pnl-bg" src="${PN[name].img}" alt="">${inner}</div>`;
-  const at = (name, [x, y, w, h], html, cls = '', tag = 'div', attrs = '') => {
-    const p = PN[name];
-    return `<${tag} class="at ${cls}" ${attrs} style="left:${pc(x, p.w)};top:${pc(y, p.h)};width:${pc(w, p.w)};height:${pc(h, p.h)}">${html}</${tag}>`;
-  };
-  // game text: two-colour vertical gradient (Text_Draw colour pairs, PS2 0x80 = full); --fs in panel pixels
-  const gt = (txt, fs, c1 = '#fff', c2 = '#808080', cls = '') =>
-    `<span class="gt ${cls}" style="--fs:${fs};--c1:${c1};--c2:${c2}">${esc(txt)}</span>`;
-  const shift = (box, i, pitch) => [box[0] + (i % 4) * pitch[0], box[1] + Math.floor(i / 4) * pitch[1], box[2], box[3]];
-
-  // breed emblem on the Mon info name plate: face on the gold bar, name in the blue band
-  const plate = (k) => panel('plate',
-    at('plate', PN.plate.slots.face, ico(k === SPECIAL ? D.meta.specialIcon : BR[k].icon, 'face', breedName(k))) +
-    at('plate', PN.plate.slots.name, gt(breedName(k), 12), 'mid'));
-  // Mon info breed row: main face x sub face, monster name in the dark bar
-  const breedRow = (s) => {
-    const S = PN.breedrow.slots;   // faces: FUN_00296a30 picks (Ape variants, special mains, "?" subs), data build
-    return panel('breedrow', at('breedrow', S.main, ico(s.faces[0], 'face', breedName(s.main ?? SPECIAL))) +
-      at('breedrow', S.sub, ico(s.faces[1], 'face', BR[s.sub]?.name ?? '')) +
-      at('breedrow', S.name, gt(s.name, 15), 'mid'));
-  };
+  const TX = D.meta.texts, RANK_IMG = D.meta.rankIcons;
+  // breed emblem = the game's face on its blue disc + gold ring (extract APP.md § Icon map)
+  const emblem = (src, title = '', cls = 'emb') => src ? `<img class="${cls}" src="${src}" alt="${esc(title)}" title="${esc(title)}">` : '';
+  // main x sub emblems (faces per monster from the game's rule: Ape variants, special mains, "?" subs)
+  const pair = (s) => `<span class="pair">${emblem(s.faces[0], breedName(s.main ?? SPECIAL), 'emb sm')}` +
+    `<i class="x" aria-hidden="true"></i>${emblem(s.faces[1], BR[s.sub]?.name ?? '', 'emb sm')}</span>`;
 
   const typeBadge = (s) => MTYPE[s.type] ? `<span class="iv">${ico(MTYPE[s.type].icon, 'badge', MTYPE[s.type].name)}${esc(MTYPE[s.type].name)}</span>` : '';
 
@@ -63,54 +43,51 @@
   function renderHome() {
     const keys = [...D.breeds.map((b) => b.id), ...(members[SPECIAL] ? [SPECIAL] : [])];
     $('#view').innerHTML = `<div class="emblems">${keys.map((k) =>
-      `<button class="emblem" data-breed="${k}" aria-label="${esc(breedName(k))}">${plate(k)}</button>`).join('')}</div>`;
+      `<button class="emblem" data-breed="${k}">${emblem(k === SPECIAL ? D.meta.specialIcon : BR[k].icon, breedName(k))}` +
+      `<b>${esc(breedName(k))}</b></button>`).join('')}</div>`;
   }
 
   // ---- breed overlay ----
-  const monRow = (s, k) => {
-    return `<div class="mrow">${breedRow(s)}<div class="mrow-b"><div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
-      STATS.map((x) => `<i>${x}</i><b>${s.base[x]}</b><div class="bar"><i style="width:${Math.min(100, s.base[x] / 3)}%"></i></div>` +
-        `<span class="g g${s.grade[x]}">${s.grade[x]}</span>`).join('') +
-      '</div></div></div></div>';
-  };
-  // Mon info technique page: "Skills" grid (layout 20; slot n = tile n, picture = MON_WZP set + slot) and the detail
-  // box under it (layout 21, FUN_0011c998). Slots 12-15 (Counter, finisher, tag skills) have no tile in the game.
-  const skillsPanel = (techs, sel) => {
-    const S = PN.skills.slots;
-    return panel('skills', at('skills', S.title, gt(TX.skills, 13, '#462800', '#462800', 'flat')) +
-      techs.filter((t) => t.slot < 12).map((t) =>
-        at('skills', shift(S.pic0, t.slot, S.pitch), ico(t.icon, 'waza', t.name)) +
-        at('skills', shift(S.tile0, t.slot, S.pitch), '', 'hit', 'button', `data-tech="${t.id}" aria-label="${esc(t.name)}"`)).join('') +
-      at('skills', shift(S.cursor0, sel?.slot ?? 0, S.pitch), `<img src="${PT.cursor}" alt="">`, `cursor${sel && sel.slot < 12 ? '' : ' off'}`));
-  };
-  // range text colours: entries r / r+1 of the table at 0x4f6e10 (top / bottom of the gradient)
+  // stat colours = the Mon info stat labels (POW red, LIF orange, INT green, ACC = SKI magenta, DEF blue, SPD cyan)
+  const monRow = (s) =>
+    `<div class="mrow"><div class="mrow-h">${pair(s)}<b>${esc(s.name)}</b></div>` +
+    `<div class="mrow-b"><div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
+    STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b><div class="bar s-${x}"><i style="width:${Math.min(100, s.base[x] / 3)}%"></i></div>` +
+      `<span class="g g${s.grade[x]}">${s.grade[x]}</span>`).join('') +
+    '</div></div></div></div>';
+
+  // techniques: pictogram grid by slot (as the game's Skills page), detail card for the selected one
   const RANGE_C = ['#f47468', '#f47468', '#f4dc64', '#f4dc64', '#78ec80', '#78ec80', '#78ec80', '#78ec80', '#78ec80'];
-  const RANK_KEYS = ['damage', 'withering', 'sharpness', 'hit'];
-  const techDetail = (t) => {
-    const I = PN.techinfo.slots, R = PN.techranks.slots, e = ELEM[t.element], c = CAT[t.category];
-    const type = t.type === 0 ? gt(TX.pow, 12, '#f0d840', '#40d450') : t.type === 1 ? gt(TX.int, 12, '#40d450', '#78ec80') : '';
-    return panel('techinfo',
-      at('techinfo', I.pic, ico(t.icon, 'waza', t.name)) + at('techinfo', I.name, gt(t.name, 15)) +
-      at('techinfo', I.type, type) +
-      at('techinfo', I.range, t.range != null ? gt(D.meta.ranges[t.range], 12, RANGE_C[t.range], RANGE_C[t.range + 1]) : '') +
-      at('techinfo', I.gutsLabel, gt(TX.guts, 12)) + at('techinfo', I.guts, gt(t.guts, 12), 'end') +
-      at('techinfo', I.effLabel, gt(TX.effects, 12, '#fc8034', '#fc8034')) +
-      at('techinfo', I.eff, t.effect ? gt(t.effect, 12) : '') +
-      at('techinfo', I.category, ico(c?.icon, 'ico')) + at('techinfo', I.element, ico(e?.icon, 'ico', e?.name))) +
-      panel('techranks', RANK_KEYS.map((k) => at('techranks', R[k], `<img src="${PT['rank_' + 'EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`) +
-        at('techranks', [R[k][0] - 92, R[k][1] + 7, 60, 16], gt(t[k], 11, '#9aa', '#566'))).join(''));
-  };
+  // the four rate boxes of the game's technique page, in its label colours; letters = cmn_waza_rank (E..S)
+  const RATES = [['damage', 'Life Damage', 'r-life'], ['withering', 'Guts Damage', 'r-guts'],
+    ['sharpness', 'Critical Hit Rate', 'r-crit'], ['hit', 'Accuracy Rate', 'r-acc']];
+  const rateMax = Object.fromEntries(RATES.map(([k]) => [k, Math.max(...D.techniques.map((t) => t[k]))]));
+  const skillGrid = (techs, sel) => `<div class="wgrid">${techs.filter((t) => t.slot < 12).map((t) =>
+    `<button class="wcell${t === sel ? ' on' : ''}" data-tech="${t.id}" style="grid-area:${Math.floor(t.slot / 4) + 1}/${t.slot % 4 + 1}">` +
+    `${ico(t.icon, 'waza', t.name)}</button>`).join('')}</div>`;
   const extraTechs = (techs, sel) => techs.filter((t) => t.slot >= 12).map((t) =>
     `<button class="xtech${t === sel ? ' on' : ''}" data-tech="${t.id}">${esc(t.name)}</button>`).join('');
+  const techDetail = (t) => {
+    const e = ELEM[t.element], c = CAT[t.category];
+    const type = t.type === 0 ? `<span class="tt t-pow">${esc(TX.pow)}</span>` : t.type === 1 ? `<span class="tt t-int">${esc(TX.int)}</span>` : '';
+    const range = t.range != null ? `<span class="tt" style="--c1:${RANGE_C[t.range]};--c2:${RANGE_C[t.range + 1]}">${esc(D.meta.ranges[t.range])}</span>` : '';
+    return `<div class="tcard"><div class="tc-h">${ico(t.icon, 'waza', t.name)}<div class="tc-n"><b>${esc(t.name)}</b>` +
+      `<div class="tc-m">${type}${range}</div></div><span class="tc-i">${ico(c?.icon, 'ico')}${ico(e?.icon, 'ico', e?.name)}</span></div>` +
+      `<div class="tc-s"><span>${esc(TX.guts)} <b>${t.guts}</b></span>` +
+      (t.effect && t.effect !== 'NONE' ? `<span>${esc(TX.effects)} <b>${esc(t.effect)}</b></span>` : '') + '</div>' +
+      `<div class="rates">${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
+        `<div class="bar ${cls}"><i style="width:${Math.round(t[k] / rateMax[k] * 100)}%"></i></div>` +
+        `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div>`;
+  };
 
   const BREED_VIEWS = {
-    mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map((s) => monRow(s, k)).join('')}</div>` },
+    mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map(monRow).join('')}</div>` },
     breed: {
       label: 'Breed',
       body(k) {
         const pure = pureOf(k), techs = techsOf(k), sel = techs.find((t) => t.id === open.tech[k]) || techs[0];
         return `<div class="sec"><h3>Type</h3>${typeBadge(pure)}</div>` +
-          `<div class="sec waza-page" data-k="${k}"><div class="skills">${skillsPanel(techs, sel)}</div>` +
+          `<div class="sec waza-page" data-k="${k}"><h3>${esc(TX.skills)}</h3><div class="skills">${skillGrid(techs, sel)}</div>` +
           `<div class="xtechs">${extraTechs(techs, sel)}</div><div class="tdetail">${sel ? techDetail(sel) : ''}</div></div>`;
       },
     },
@@ -123,7 +100,7 @@
     if (!t || !page) return;
     const k = page.dataset.k, techs = techsOf(k);
     open.tech[k] = id;
-    page.querySelector('.skills').innerHTML = skillsPanel(techs, t);
+    page.querySelector('.skills').innerHTML = skillGrid(techs, t);
     page.querySelector('.xtechs').innerHTML = extraTechs(techs, t);
     page.querySelector('.tdetail').innerHTML = techDetail(t);
   }

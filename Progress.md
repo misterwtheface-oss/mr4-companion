@@ -21,6 +21,13 @@
   cmn_waza_rank table, raw value beside). Slots 12-15 (Counter, finisher, tag skills; no tile in the game) are chips
   under the grid. Emblem = res 0x8B blue disc + gold ring + face (frame-matched); faces code-backed per monster (Ape
   variants, special monsters, "?" subs). Technique pictograms are now the full-colour art (the game draws them opaque).
+- 2026-11-08 (user trim): only chosen game parts stay. Main page = bare emblems (disc + ring + face) + name; monster
+  rows = main emblem, CSS gold "x", sub emblem, name; stat bars in the Monster Data label colours (POW red, LIF orange,
+  INT green, SKI = ACC magenta, DEF blue, SPD cyan). Techniques = pictogram grid by slot (selection glow) + a CSS card:
+  type / range in the game's gradients, guts, Added Effects (when not NONE), category + element icons, and the four
+  rates as rows in the game's label colours (Life Damage red, Guts Damage cyan, Critical yellow, Accuracy magenta) with
+  a magnitude bar (share of that stat's largest value), the raw value and the game's E..S letter. Panel backgrounds
+  are no longer shipped (the extract export keeps them).
 
 ## Open
 Backlog (user, 2026-11-08):
@@ -48,6 +55,8 @@ Backlog (user, 2026-11-08):
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
 
 ## Session log
+- 2026-11-08 [mr4.app] User trim of the game panels (State, "user trim"): emblems, CSS x pair, pictograms, rate rows
+  with game colours. What changed and why: the user wanted only chosen parts of the high-fidelity panels.
 - 2026-11-08 [mr4.app] Game panels: extract `tools/layouts.py` (LAYOUTS format decoded, panel export), `icon_map.py`
   (emblems from res 0x8B, opaque pictograms, code-backed faces), APP.md § UI layouts, REQUESTS face item closed; app
   build copies panels + emblems, adds technique `effect` / `rank` and per-monster `faces`; app.js panels. What changed
