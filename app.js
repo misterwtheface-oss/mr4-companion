@@ -5,7 +5,9 @@
   // (never from a disc, no Book route, pure only, boss-like records; extract 05_summon § 1.7)
   // npcs: 7 normal-breed monsters the player cannot get, marked by flat 100 base stats (Dodon, Ceralino, Ayatea,
   // Millielle, Balbalo, JackInTheCho, Spartacus; all on the never-from-a-disc list, extract 05_summon § 1.5); kept in data
-  const FEATURES = { bosses: false, npcs: false };
+  // groupSkills: the 4 picture-less techniques per breed (slots 12+: Counter, a unique one, Tag Skill 1 / 2) are group /
+  // special attacks, not comparable with the 12 core ones; hidden until they get a home, and left out of the bar scale
+  const FEATURES = { bosses: false, npcs: false, groupSkills: false };
   const isNpc = (s) => STATS.every((x) => s.base[x] === 100);
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -29,7 +31,7 @@
   const pureOf = (k) => (k === APE ? members[APE][0] : members[k].find((s) => s.sub === s.main));
   const techsOf = (k) => (k === APE
     ? techsOf(GARU).map((t) => ({ ...t, name: t.nameApe ?? t.name, icon: t.iconApe ?? t.icon }))
-    : D.techniques.filter((t) => t.genus === +k).sort((a, b) => a.slot - b.slot));
+    : D.techniques.filter((t) => t.genus === +k && (FEATURES.groupSkills || t.slot < 12)).sort((a, b) => a.slot - b.slot));
   const groupIcon = (k) => (k === SPECIAL ? D.meta.specialIcon : k === APE ? members[APE][0].faces[0] : BR[k].icon);
 
   // ---- state (localStorage mr4c.state) ----

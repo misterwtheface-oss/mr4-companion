@@ -45,6 +45,8 @@
   hidden by FEATURES.npcs (app.js); still in data.js.
 
 ## Open
+- Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
+  where they go; hidden by FEATURES.groupSkills, own bar scale when shown.
 Backlog (user, 2026-11-08):
 - [ ] How traits work: decode res 0xF1 (kind + 4 x (effect, value)) and the battle / training consumers into plain
       words per trait (extract 01_monster § 4.4, 03_battle).
@@ -73,6 +75,9 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Group skills hidden (FEATURES.groupSkills): the 4 picture-less techniques per breed (slots 12+)
+  are group / special attacks, not comparable with the core 12; bar scale now from the core 12 only (Life Damage top 66 -> 62,
+  Accuracy 100 -> 63). Data kept.
 - 2026-11-08 [mr4.app] Technique card: Guts Cost is its own magnitude bar (first rate row, blue, no letter: the game
   has none for it), replacing the "GUTS n" text; effect line only when the technique has one.
 - 2026-11-08 [mr4.app] Technique rate bars now scale from the shown breeds' techniques only; monster and technique
