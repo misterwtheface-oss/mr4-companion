@@ -34,6 +34,8 @@
   ring scaled from one --e diameter, bare face on top (styles.css .emb); the composed emblem PNGs stay in the extract.
   Palette rebuilt around the emblem (user): darker, calmer disc + muted brass ring; UI = navy-charcoal surfaces, one
   brass accent (--gold: active tab, selection, headings, high grades; replaces teal), ivory text (styles.css :root).
+  Monster pictures sit on a lit neutral-slate stage with a CSS ground shadow + drop shadow (the renders are Blender
+  Workbench, studio light, no shadows). Open: optional re-render with cast shadows (shadow catcher), ~1 h Task Scheduler.
 
 ## Open
 Backlog (user, 2026-11-08):
