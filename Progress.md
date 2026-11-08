@@ -46,7 +46,7 @@
 
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
-  where they go; hidden by FEATURES.groupSkills, own bar scale when shown.
+  where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.
 Backlog (user, 2026-11-08):
 - [ ] How traits work: decode res 0xF1 (kind + 4 x (effect, value)) and the battle / training consumers into plain
       words per trait (extract 01_monster § 4.4, 03_battle).
