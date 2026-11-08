@@ -6,11 +6,13 @@ Reads  ../_mr4_extract/web/data.js            (window.MR4_DATA, tools/build_data
        ../_mr4_extract/assets/renders/mr4/    (<species>_<Name>_35.png, 512 px 3/4 view, xgame_renders.py)
        ../_mr4_extract/data/assets/icon_map.json + assets/icons/   (code-backed icon map, tools/icon_map.py)
        ../_mr4_extract/assets/renders/mr4_items/  (<id>_<Name>_35.png, tools/item_renders.py)
+       ../_mr4_extract/data/assets/ui_panels.json + assets/icons/panel/   (game UI panels, tools/layouts.py export)
 Writes data/data.js                           (window.MR4_DATA, only the fields the app reads)
        assets/mon/<species>.webp              (detail image, 384 px)
        assets/mon/s/<species>.webp            (list thumbnail, 96 px)
        assets/item/<id>.webp, assets/item/s/<id>.webp   (item render, 256 / 64 px)
        assets/icon/waza/<set>_<slot>.png, assets/icon/ui/<tex>.png   (technique pictograms; element / category / type icons)
+       assets/icon/panel/<name>.png           (panel backgrounds composed from the game's layout parts, rank letters)
 
 Every image carries a provenance tag in data.js (`img`: "render:<file>" or "none:<reason>"); there is no fallback image.
 --strict fails the build on any error: a reachable species without a render, a render whose name differs from the
@@ -27,6 +29,7 @@ RENDERS = os.path.join(X, "assets", "renders", "mr4")
 ITEM_RENDERS = os.path.join(X, "assets", "renders", "mr4_items")
 ICON_MAP = os.path.join(X, "data", "assets", "icon_map.json")
 ICONS = os.path.join(X, "assets", "icons")
+UI_PANELS = os.path.join(X, "data", "assets", "ui_panels.json")
 MON = os.path.join(APP, "assets", "mon")
 ITEM = os.path.join(APP, "assets", "item")
 ITEM_DETAIL, ITEM_THUMB = 256, 64
@@ -84,7 +87,11 @@ def main():
     sk = {(r["genus"], r["slot"]): r for r in
           json.load(open(os.path.join(X, "data", "battle", "techniques.json"), encoding="utf-8"))["records"]}
     sp_raw = json.load(open(os.path.join(X, "data", "monster", "species.json"), encoding="utf-8"))
-    sp_type = {r["index"]: r["var_A9"] for r in (sp_raw if isinstance(sp_raw, list) else sp_raw["records"])}
+    sp_rows = sp_raw if isinstance(sp_raw, list) else sp_raw["records"]
+    sp_type = {r["index"]: r["var_A9"] for r in sp_rows}
+    # special mains 0x26..0x2F have no breed id in data.js; their record's name provenance names it
+    sp_special = {r["index"]: int(m.group(1), 16) for r in sp_rows
+                  if (m := re.search(r"special main (0x[0-9A-Fa-f]+)", r.get("name_src") or ""))}
     shipped = []   # every icon / picture path data.js references (404 guard below)
 
     def icon(rel):   # rel = "ui/ui_116.png" | "waza/set00_00.png" -> app path (copied), provenance = icon_map row
@@ -103,12 +110,35 @@ def main():
     categories = [{"id": c["id"], "icon": icon(c["icon"])} for c in im_map["categories"]]
     mon_types = [{"id": t["id"], "name": t["label"], "icon": icon(t["icon"])} for t in im_map["monster_types"]]
     # breed faces (res 0x8A, art-matched by id); "?" face 38 stands for the special monsters with no main breed
-    breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["icon"])} for b in im_map["breeds"]]
+    breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["emblem"])} for b in im_map["breeds"]]
     if [b["id"] for b in breeds] != [b["id"] for b in d["breeds"]]:
         errors.append("icon_map breeds do not cover every breed")
-    special_icon = icon(next(f["icon"] for f in im_map["extra_faces"] if f["tex"] == 38))
+    face_rows = {b["tex"]: b for b in im_map["breeds"] + im_map["extra_faces"]}
+    special_icon = icon(face_rows[0x26]["emblem"])
+
+    def faces(main, sub):
+        # FUN_00296a30 (extract APP.md § Icon map): face index of the main and sub slot of the Mon info breed row
+        f_main = main
+        if main == 0x1A and sub in (0x23, 0x24, 0x25):   # FUN_0028a6b0: Garu + Ape sub
+            f_main = {0x25: 0x27, 0x24: 0x28, 0x23: 0x29}[sub]
+        if 0x26 <= main < 0x30:                          # Mon_IsSpecialMain
+            f_main = 0x21 + (main - 0x26) % 5
+        f_sub = 0x26 if sub is None or 0x21 <= sub <= 0x25 or 0x26 <= sub < 0x30 else sub
+        return [icon(face_rows[f_main]["emblem"]), icon(face_rows[f_sub]["emblem"])]
     ranges = {int(k): v for k, v in im_map["texts"]["technique_range"].items()}
     tech_icon = {t["id"]: t for t in im_map["techniques"]}
+
+    # game UI panels (extract APP.md § UI layouts): backgrounds + content boxes in panel pixels
+    up = json.load(open(UI_PANELS, encoding="utf-8"))
+    panels = {k: {"img": icon(v["png"]), "w": v["w"], "h": v["h"], "slots": v["slots"]} for k, v in up["panels"].items()}
+    panel_tex = {k: icon(v["png"]) for k, v in up["tex"].items()}
+    wr = up["waza_rank"]
+
+    def waza_rank(col, v):   # DB_CsvFindRow: first row r with t[r+1][col] > v, else the last row; 0..5 = E..S
+        c = wr["cols"].index(col)
+        return next((r for r in range(len(wr["rows"]) - 1) if wr["rows"][r + 1][c] > v), len(wr["rows"]) - 1)
+    msg_db = {e["i"]: e["text"] for e in
+              json.load(open(os.path.join(X, "data", "core", "text_db.json"), encoding="utf-8"))["strings"]}
 
     item_ids = {i["id"] for i in d["items"]}
     tech_ids = {t["id"] for t in d["techniques"]}
@@ -146,6 +176,7 @@ def main():
                                           "lifespan", "traits", "favItems", "startTechs")} |
                        {"img": img, "type": sp_type.get(sid), "book": b["routes"] if b else None,
                         "pic": [ver(f"assets/mon/{sid}.webp"), ver(f"assets/mon/s/{sid}.webp")] if img.startswith("render:") else None,
+                        "faces": faces(s["main"] if s["main"] is not None else sp_special.get(sid, 0x26), s["sub"]),
                         "disc": b["discObtainable"] if b else None})
 
     # ids 128-133: no name, not on the calendar (extract hygiene.txt)
@@ -167,6 +198,9 @@ def main():
         techniques.append({k: t[k] for k in ("id", "genus", "slot", "name", "type", "guts", "hit", "sharpness",
                                               "damage", "withering", "heal", "followup", "element", "category")} |
                           {"range": r.get("power_class") if r.get("power_class") in ranges else None,
+                           # Mon info detail (FUN_0011c998): "Added Effects" = msg 0xDB[0xAF + effect_code] (< 0x22)
+                           "effect": msg_db.get(0xAF + r["effect_code"]) if 0 <= r.get("effect_code", -1) < 0x22 else None,
+                           "rank": {c: waza_rank(c, t[c]) for c in wr["cols"]},
                            "icon": icon(ti["icon"]) if ti.get("icon") else None,
                            "iconApe": icon(ti["icon_ape"]) if ti.get("icon_ape") else None})
 
@@ -206,7 +240,9 @@ def main():
         "meta": {"game": d["meta"]["game"], "status": d["meta"]["status"],
                  "source": d["meta"]["generatedAt"], "stats": STATS, "statNames": d["meta"]["statNames"],
                  "elements": elements, "categories": categories, "monTypes": mon_types, "ranges": ranges,
-                 "specialIcon": special_icon},
+                 "specialIcon": special_icon, "panels": panels, "panelTex": panel_tex,
+                 "texts": {"pow": msg_db[0x85], "int": msg_db[0x86], "guts": msg_db[0x4D], "effects": msg_db[0x4E],
+                           "skills": msg_db[0x4B]}},
         "breeds": breeds,
         "species": species,
         "techniques": techniques,

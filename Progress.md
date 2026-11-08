@@ -13,21 +13,31 @@
   share (monster type, technique list). The old Techniques / Items / Tournaments tabs are gone from the layout (the data
   stays in data.js for later features).
 
+- 2026-11-08 (game panels): emblems and techniques are drawn the way the game draws them, from the game's own UI
+  layouts (extract APP.md § UI layouts / § Icon map). Main page = one Mon info name plate per breed (gold bar, emblem,
+  name in the blue band). Monster rows start with the Mon info breed row (main emblem x sub emblem, name). Breed view =
+  the Mon info technique page: "Skills" grid (slot n = tile n, tap to select, cursor arrow) + the detail box (type,
+  range, name, guts, Added Effects, category / element sockets) + four rank boxes (E..S letters from the game's
+  cmn_waza_rank table, raw value beside). Slots 12-15 (Counter, finisher, tag skills; no tile in the game) are chips
+  under the grid. Emblem = res 0x8B blue disc + gold ring + face (frame-matched); faces code-backed per monster (Ape
+  variants, special monsters, "?" subs). Technique pictograms are now the full-colour art (the game draws them opaque).
+
 ## Open
 Backlog (user, 2026-11-08):
 - [ ] How traits work: decode res 0xF1 (kind + 4 x (effect, value)) and the battle / training consumers into plain
       words per trait (extract 01_monster § 4.4, 03_battle).
-- [ ] Technique panels drawn like the game's (border, container, backfill): find the technique-page frame textures
-      (Mon info technique page 0x11b8e8 / slot draw 0x11c218) and rebuild the panel from them.
-- [ ] Breed emblems inside the game's UI container: find the frame the faces sit in on screen (draw site of res 0x8A,
-      extract REQUESTS) and use it.
+- [x] Technique panels drawn like the game's: layouts 20 / 21 rebuilt from their parts (State, 2026-11-08 game panels).
+- [x] Breed emblems inside the game's UI container: res 0x8B backdrop + Mon info name plate / breed row.
 - [ ] Bring back the per-stat modifier next to the grade (old monster page "Growth" column, species growthMod -8..8,
       = 2 x (grade - 5) on 97% of records; meaning not decoded: battle / training handoff, extract 01_monster var
       0x34-0x39). Decide its label once the meaning is known.
 - [ ] Per-monster extras (user decides what to show): traits, favourite items, likes / dislikes by food and item
       category (species.json food_cat / item_cat, not yet in data.js), like levels (battles, rest), personality odds
       (mix of main and sub breed tables). Personality names and food-category names still need decoding.
-- [ ] Breed face draw site not traced (extract REQUESTS); faces are art-matched to breed ids.
+- [x] Breed face draw site traced (`FUN_00296a30`); faces code-backed.
+- [x] In-game check of the technique page (route `_mr4_extract/tools/route_data_pages.txt`, page 2 Customizing): grid,
+      opaque pictograms, detail box and rank boxes match. Not yet seen in a frame: a selected technique (name / rank
+      letter positions are code-derived only).
 - [x] Item pictures: 498 item renders (item id -> model file 0x247 + id) in lists and detail; Envelopes / "(NONE)"
       have no model. Re-render: `_mr4_extract/tools/item_renders.py all` (task MR4_item_renders).
 - [x] Icons: technique pictograms (lists, detail, monster technique chips; Ape variants use their own set), element
@@ -38,6 +48,10 @@ Backlog (user, 2026-11-08):
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
 
 ## Session log
+- 2026-11-08 [mr4.app] Game panels: extract `tools/layouts.py` (LAYOUTS format decoded, panel export), `icon_map.py`
+  (emblems from res 0x8B, opaque pictograms, code-backed faces), APP.md § UI layouts, REQUESTS face item closed; app
+  build copies panels + emblems, adds technique `effect` / `rank` and per-monster `faces`; app.js panels. What changed
+  and why: user asked for emblems and techniques drawn as in game, with their surrounding UI.
 - 2026-11-08 [mr4.app] changed app.js, styles.css, index.html, tools/build_data.py, data.js, assets/icon/breed (new);
   extract tools/icon_map.py, APP.md § Icon map, REQUESTS.md. What changed and why: user's layout spec: breed face grid
   (game's res 0x8A faces found in the ELF), breed overlay with Monsters / Breed toggle, monster rows with picture + stat
