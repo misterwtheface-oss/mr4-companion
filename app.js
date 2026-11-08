@@ -71,7 +71,7 @@
   const shownGroups = Object.keys(members).filter((k) => k !== SPECIAL || FEATURES.bosses);
   const statMax = magMax(shownGroups.flatMap((k) => members[k]), STATS, (s, x) => s.base[x]);
   // stat colours = the Mon info stat labels (POW red, LIF orange, INT green, ACC = SKI magenta, DEF blue, SPD cyan)
-  // per stat: base, growth grade 1..9 with its training-gain % (growthPct, traits applied; extract MONSTER_DATA.md
+  // per stat: base, growth grade 1..9 with its training-gain % (growthPct, breed grade only, traits left out; extract MONSTER_DATA.md
   // § Growth), modifier -8..8 (swing of the gain roll); growth type = peak of the age curve (cmn_glow_number column)
   const GROWTH_TYPE = ['Early', 'Early-mid', 'Normal', 'Mid-late', 'Late', 'Steady'];
   const signed = (n) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0');

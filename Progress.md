@@ -68,7 +68,7 @@ Backlog (user, 2026-11-08):
       have no model. Re-render: `_mr4_extract/tools/item_renders.py all` (task MR4_item_renders).
 - [x] Icons: technique pictograms (lists, detail, monster technique chips; Ape variants use their own set), element
       icon + name, category icon, range, monster type badge. Rank icons are mapped (icon_map.json) but not used yet.
-- [x] Grade shown with its training-gain % (growthPct, traits applied); growth type named by the peak of its age curve
+- [x] Grade shown with its training-gain % (growthPct, breed grade only: traits are swappable); growth type named by the peak of its age curve
       (Early / Early-mid / Normal / Mid-late / Late / Steady; names are ours, the game shows none) + lifespan.
 - [ ] Book routes: real album titles for discs; "From Book" stat generation (extract REQUESTS / 05_summon Q5).
 - [ ] Planner features (raising, combining) after the encyclopedia.
@@ -78,6 +78,7 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] growthPct no longer includes trait grade lifts (user: traits are swappable, show the breed value).
 - 2026-11-08 [mr4.app] Monster rows: per stat Base / bar / Growth grade + gain % / Mod, plus Lifespan and growth type
   (user ask). growthPct built in tools/build_data.py from res 0x49 + 0x08 and trait effects 10-16. Open: nothing new.
 - 2026-11-08 [mr4.app] Group skills hidden (FEATURES.groupSkills): the 4 picture-less techniques per breed (slots 12+)

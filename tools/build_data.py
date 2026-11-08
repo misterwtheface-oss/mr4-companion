@@ -167,22 +167,13 @@ def main():
     tech_ids = {t["id"] for t in d["techniques"]}
     trait_ids = {t["id"] for t in d["traits"]}
     # growth %: training gain x fitG / 20 with fitG = tra_fit_number_paraup[grade - 1] (res 0x49, Trn_GainFormula
-    # 0x29f378); a trait with effect 10 + stat (Hi Power ..) or 16 (Glass Heart: all stats) lifts the grade through
-    # cmn_hosei_fit (res 0x08, Mon_HasGradeBoostTrait 0x284718 / Mon_GetGrade 0x28c618); extract MONSTER_DATA.md § Growth
-    raising = os.path.join(X, "data", "raising")
-    fit_up = [r[0] for r in json.load(open(os.path.join(raising, "49_tra_fit_number_paraup.json"), encoding="utf-8"))["data"]]
-    hosei_fit = [r[0] for r in json.load(open(os.path.join(raising, "08_cmn_hosei_fit.json"), encoding="utf-8"))["data"]]
-    trait_fx = {t["id"]: {c for c, _ in t["effects"]} for t in d["traits"]}
+    # 0x29f378), from the breed's own grade only: traits are swappable (mon_info SLOT_CHANGE_CRCT), so their grade lift
+    # (cmn_hosei_fit) is left out (user 2026-11-08); extract MONSTER_DATA.md § Growth
+    fit_up = [r[0] for r in json.load(open(os.path.join(X, "data", "raising", "49_tra_fit_number_paraup.json"),
+                                           encoding="utf-8"))["data"]]
 
     def growth_pct(s):
-        fx = set().union(*(trait_fx[i] for i in s["traits"] or [] if i in trait_fx))
-        out = {}
-        for i, x in enumerate(STATS):
-            g = s["grade"][x]
-            if 10 + i in fx or 16 in fx:
-                g = hosei_fit[g - 1]
-            out[x] = round((fit_up[g - 1] / 20 - 1) * 100)
-        return out
+        return {x: round((fit_up[s["grade"][x] - 1] / 20 - 1) * 100) for x in STATS}
     enemy_ids = {e["id"] for e in d["enemies"]}
     book = {b["species"]: b for b in d["book"]}
 
