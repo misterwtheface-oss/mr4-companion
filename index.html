@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#161b20">
+<title>MR4 Companion</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <h1>MR4 Companion</h1>
+  <nav class="tabs" id="tabs">
+    <button data-tab="monsters">Monsters</button>
+    <button data-tab="techniques">Techniques</button>
+    <button data-tab="items">Items</button>
+    <button data-tab="tournaments">Tournaments</button>
+  </nav>
+  <div class="filters" id="filters"></div>
+</header>
+<main id="view"></main>
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-bar">
+      <button class="icon" data-act="back" id="back" aria-label="Back">&#8249;</button>
+      <span class="sheet-title" id="sheet-title"></span>
+      <button class="icon" data-act="close" aria-label="Close">&#215;</button>
+    </div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </div>
+</div>
+<script src="data/data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

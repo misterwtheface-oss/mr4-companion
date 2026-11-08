@@ -1,0 +1,10 @@
+# The datamine workspace is NEVER shipped in this repo; only the subset written into
+# data/data.js + assets/ by tools/build_data.py is tracked.
+../_mr4_extract/
+_mr4_extract/
+!.nojekyll
+__pycache__/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
