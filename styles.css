@@ -1,8 +1,9 @@
-/* Mobile first; palette drawn from the in-game Book (steel, bronze, teal glow). */
+/* Mobile first. Palette built around the emblem's blue disc + gold ring: deep navy-charcoal surfaces, one muted
+   brass accent (active / selected / high), warm ivory text; no third hue, so nothing fights the blue and gold. */
 :root {
-  --bg: #161b20; --panel: #222a31; --panel2: #2b343c; --line: #3a4550;
-  --steel: #9aa7b2; --text: #e6ebef; --dim: #8d99a3;
-  --bronze: #c9954a; --teal: #5fe0d0; --bad: #e0725f;
+  --bg: #11151c; --panel: #1a202a; --panel2: #232b37; --line: #2f3946;
+  --steel: #a3acb8; --text: #ece7dc; --dim: #8a929e;
+  --gold: #c8a55a; --gold-hi: #e2c88a; --gold-ink: #1b1508; --blue: #3a5994; --bad: #cf7b6b;
   --r: 10px;
   /* game colours are kept exact (--g) and softened here: share of the game colour vs a muted steel grey */
   --soft: 68%; --mute: #a9b3bb;
@@ -12,9 +13,9 @@ html, body { margin: 0; background: var(--bg); color: var(--text);
   font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 button { font: inherit; color: inherit; }
 
-.top { position: sticky; top: 0; z-index: 5; background: linear-gradient(#1d242a, var(--bg));
-  border-bottom: 2px solid var(--bronze); padding: 8px 10px; }
-.top h1 { margin: 0; font-size: 17px; letter-spacing: .04em; color: var(--bronze); }
+.top { position: sticky; top: 0; z-index: 5; background: linear-gradient(#1a2130, var(--bg));
+  border-bottom: 2px solid var(--gold); padding: 8px 10px; }
+.top h1 { margin: 0; font-size: 17px; letter-spacing: .04em; color: var(--gold); }
 main { padding: 12px 10px; }
 
 /* breed emblem: CSS take on the game's container (res 0x8B blue disc + gold ring) with the bare face on top;
@@ -22,8 +23,8 @@ main { padding: 12px 10px; }
 .emb { --e: 48px; position: relative; display: inline-grid; place-items: center; flex: none;
   width: var(--e); height: var(--e); border-radius: 50%; box-sizing: border-box;
   border: max(2px, calc(var(--e) * .07)) solid transparent;
-  background: radial-gradient(circle at 38% 30%, #5d8fe0, #2c5bb8 48%, #173a85 78%, #0f2a66) padding-box,
-              linear-gradient(150deg, #fbe6a0, #d9a838 30%, #a8761c 55%, #f0cf72 75%, #9a6a14) border-box;
+  background: radial-gradient(circle at 38% 30%, #40619c, #26406f 50%, #182b4d 80%, #111f39) padding-box,
+              linear-gradient(150deg, #e9d7a2, #c19a4e 30%, #8c6a2c 55%, #d6bb7a 75%, #7d5e26) border-box;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .45), inset 0 0 calc(var(--e) * .08) rgba(0, 0, 0, .35); }
 .emb img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.06); }
 .emb.sm { --e: 40px; }
@@ -41,15 +42,15 @@ main { padding: 12px 10px; }
 .overlay { position: fixed; inset: 0; z-index: 10; background: rgba(5, 8, 10, .6); display: flex; align-items: flex-end; }
 .overlay[hidden] { display: none; }
 .sheet { width: 100%; height: 94vh; display: flex; flex-direction: column; background: var(--bg);
-  border-top: 2px solid var(--bronze); border-radius: 14px 14px 0 0; }
+  border-top: 2px solid var(--gold); border-radius: 14px 14px 0 0; }
 .sheet-bar { display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 14px; }
-.sheet-title { flex: 1; font-weight: 600; font-size: 17px; color: var(--bronze);
+.sheet-title { flex: 1; font-weight: 600; font-size: 17px; color: var(--gold);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .icon { width: 38px; height: 38px; border: 0; border-radius: 8px; background: var(--panel); font-size: 22px; cursor: pointer; }
 .seg { display: flex; margin: 0 12px 8px; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
 .seg:empty { display: none; }
 .seg button { flex: 1; padding: 7px 0; border: 0; background: var(--panel); color: var(--steel); cursor: pointer; }
-.seg button.on { background: var(--teal); color: #0d1a1a; font-weight: 600; }
+.seg button.on { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
 .sheet-body { flex: 1; overflow-y: auto; padding: 0 12px 24px; border-top: 1px solid var(--line); }
 
 /* monster rows: picture at full row height, then per stat: label, base, magnitude bar, growth grade */
@@ -61,7 +62,7 @@ main { padding: 12px 10px; }
 .pair { display: inline-flex; align-items: center; gap: 2px; flex: none; }
 .x { position: relative; width: 16px; height: 16px; }
 .x::before, .x::after { content: ''; position: absolute; left: 50%; top: 50%; width: 18px; height: 5px; border-radius: 2px;
-  background: linear-gradient(#ffe27a, #d9a21b 55%, #8a5a00); box-shadow: 0 0 0 1px #3a2400;
+  background: linear-gradient(#e9d7a2, #c19a4e 55%, #7d5e26); box-shadow: 0 0 0 1px #2a1f0c;
   transform: translate(-50%, -50%) rotate(45deg); }
 .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
 .mrow-b { display: flex; gap: 10px; align-items: stretch; }
@@ -73,29 +74,29 @@ main { padding: 12px 10px; }
 .mstats > i { font-style: normal; font-size: 11px; color: var(--dim); letter-spacing: .04em; }
 .mstats > b { font-weight: 600; text-align: right; }
 .bar { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; }
-.bar i { display: block; height: 100%; background: var(--c, var(--teal)); }
+.bar i { display: block; height: 100%; background: var(--c, var(--gold)); }
 /* stat colours from the game's Monster Data labels (SKI = the game's ACC.) */
 .s-POW { --g: #e0704f; } .s-LIF { --g: #e8961a; } .s-INT { --g: #52bf43; }
 .s-SKI { --g: #e062c2; } .s-DEF { --g: #7484e6; } .s-SPD { --g: #5fd2d2; }
 .mstats > i[class^="s-"] { color: var(--c); font-weight: 700; }
 .mstats .g { min-width: 1ch; text-align: right; color: var(--steel); }
 /* growth grade 1..9: higher grows faster */
-.g.g7, .g.g8, .g.g9 { color: var(--teal); font-weight: 700; }
+.g.g7, .g.g8, .g.g9 { color: var(--gold-hi); font-weight: 700; }
 .g.g1, .g.g2, .g.g3 { color: var(--bad); }
 
 /* breed view */
 .sec { margin-top: 12px; }
-.sec h3 { margin: 0 0 6px; font-size: 13px; color: var(--bronze); letter-spacing: .05em; text-transform: uppercase; }
+.sec h3 { margin: 0 0 6px; font-size: 13px; color: var(--gold); letter-spacing: .05em; text-transform: uppercase; }
 /* techniques: the game's pictograms in slot order (4 x 3), detail card for the selected one */
 .wgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 96px)); grid-template-rows: repeat(3, auto); gap: 6px; }
 .wcell { padding: 3px; border: 2px solid transparent; border-radius: 6px; background: none; cursor: pointer; line-height: 0; }
-.wcell.on { border-color: var(--teal); box-shadow: 0 0 8px rgba(95, 224, 208, .45); }
+.wcell.on { border-color: var(--gold); box-shadow: 0 0 8px rgba(200, 165, 90, .45); }
 .waza { width: 100%; height: auto; aspect-ratio: 3 / 2; image-rendering: pixelated; display: block; }
 .xtechs { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .xtechs:empty { display: none; }
 .xtech { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--text);
   font-size: 13px; cursor: pointer; }
-.xtech.on { border-color: var(--teal); color: var(--teal); font-weight: 600; }
+.xtech.on { border-color: var(--gold); color: var(--gold-hi); font-weight: 600; }
 .tcard { margin-top: 8px; padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
 .tc-h { display: flex; align-items: center; gap: 10px; }
 .tc-h .waza { width: 72px; flex: none; }
@@ -133,5 +134,5 @@ main { padding: 12px 10px; }
   .waza-page .tdetail { grid-column: 2; grid-row: 2 / span 2; }
   .waza-page .tcard { margin-top: 0; }
   .overlay { align-items: center; justify-content: center; }
-  .sheet { width: min(860px, 94vw); height: 88vh; border: 2px solid var(--bronze); border-radius: 14px; }
+  .sheet { width: min(860px, 94vw); height: 88vh; border: 2px solid var(--gold); border-radius: 14px; }
 }

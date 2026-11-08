@@ -32,6 +32,8 @@
   muted steel (--soft 68%, --mute) in one place; rank letters slightly desaturated.
   Emblem container is CSS now (user: the game's ring art looked off at app sizes): blue radial disc + gold gradient
   ring scaled from one --e diameter, bare face on top (styles.css .emb); the composed emblem PNGs stay in the extract.
+  Palette rebuilt around the emblem (user): darker, calmer disc + muted brass ring; UI = navy-charcoal surfaces, one
+  brass accent (--gold: active tab, selection, headings, high grades; replaces teal), ivory text (styles.css :root).
 
 ## Open
 Backlog (user, 2026-11-08):
