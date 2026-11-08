@@ -73,6 +73,9 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Technique rate bars now scale from the shown breeds' techniques only; monster and technique
+  bars share one helper (magMax / magBar). New app rule A-magnitude-bars (rules.json). tools/app/shot.py clicks now
+  wait for their selector (hash-routed overlays). Checked: Gigaload card = full Life / Guts / Accuracy, crit 22%.
 - 2026-11-08 [mr4.app] Monster stat bars: were a fixed 0..300 scale (base/3, undocumented, never full); now share of
   that stat's largest base among shown monsters (user pick; matches the technique rate bars and the State note).
 - 2026-11-08 [mr4.app] NPC filter: flat-100 normal-breed monsters hidden behind FEATURES.npcs (user request; data kept).

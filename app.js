@@ -62,14 +62,17 @@
   }
 
   // ---- breed overlay ----
-  // magnitude bar = share of that stat's largest base among the monsters shown (as the technique rate bars)
-  const statMax = Object.fromEntries(STATS.map((x) => [x, Math.max(...Object.entries(members)
-    .filter(([k]) => k !== SPECIAL || FEATURES.bosses).flatMap(([, l]) => l.map((s) => s.base[x])))]));
+  // magnitude bars (rule A-magnitude-bars): each value as a share of the largest value of that same field among the
+  // entries the app shows (hidden NPCs / bosses excluded), so one entry alone reads as its standing on that field
+  const magMax = (items, keys, get) => Object.fromEntries(keys.map((k) => [k, Math.max(...items.map((it) => get(it, k)))]));
+  const magBar = (v, max, cls) => `<div class="bar ${cls}"><i style="width:${Math.round(v / max * 100)}%"></i></div>`;
+  const shownGroups = Object.keys(members).filter((k) => k !== SPECIAL || FEATURES.bosses);
+  const statMax = magMax(shownGroups.flatMap((k) => members[k]), STATS, (s, x) => s.base[x]);
   // stat colours = the Mon info stat labels (POW red, LIF orange, INT green, ACC = SKI magenta, DEF blue, SPD cyan)
   const monRow = (s) =>
     `<div class="mrow"><div class="mrow-h">${pair(s)}<b>${esc(s.name)}</b></div>` +
     `<div class="mrow-b"><div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
-    STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b><div class="bar s-${x}"><i style="width:${Math.round(s.base[x] / statMax[x] * 100)}%"></i></div>` +
+    STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>`).join('') +
     '</div></div></div></div>';
 
@@ -78,7 +81,8 @@
   // the four rate boxes of the game's technique page, in its label colours; letters = cmn_waza_rank (E..S)
   const RATES = [['damage', 'Life Damage', 'r-life'], ['withering', 'Guts Damage', 'r-guts'],
     ['sharpness', 'Critical Hit Rate', 'r-crit'], ['hit', 'Accuracy Rate', 'r-acc']];
-  const rateMax = Object.fromEntries(RATES.map(([k]) => [k, Math.max(...D.techniques.map((t) => t[k]))]));
+  // techniques shown = the shown groups' sets (Ape shares Garu's numbers)
+  const rateMax = magMax(shownGroups.filter((k) => k !== APE).flatMap((k) => techsOf(k)), RATES.map(([k]) => k), (t, k) => t[k]);
   const skillGrid = (techs, sel) => `<div class="wgrid">${techs.filter((t) => t.slot < 12).map((t) =>
     `<button class="wcell${t === sel ? ' on' : ''}" data-tech="${t.id}" style="grid-area:${Math.floor(t.slot / 4) + 1}/${t.slot % 4 + 1}">` +
     `${ico(t.icon, 'waza', t.name)}</button>`).join('')}</div>`;
@@ -93,7 +97,7 @@
       `<div class="tc-s"><span>${esc(TX.guts)} <b>${t.guts}</b></span>` +
       (t.effect && t.effect !== 'NONE' ? `<span>${esc(TX.effects)} <b>${esc(t.effect)}</b></span>` : '') + '</div>' +
       `<div class="rates">${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
-        `<div class="bar ${cls}"><i style="width:${Math.round(t[k] / rateMax[k] * 100)}%"></i></div>` +
+        magBar(t[k], rateMax[k], cls) +
         `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div>`;
   };
 
