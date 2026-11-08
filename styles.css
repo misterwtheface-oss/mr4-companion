@@ -116,15 +116,15 @@ main { padding: 12px 10px; }
 .tc-s { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 6px; font-size: 13px; color: var(--dim); }
 .tc-s b { color: var(--text); font-weight: 600; }
 /* rate rows: label, magnitude bar (share of the largest value of that stat), raw value, the game's rank letter */
-.rates { display: grid; grid-template-columns: auto 1fr 2.5ch 26px; gap: 4px 8px; align-items: center;
+.rates { display: grid; grid-template-columns: auto 1fr 2.5ch 26px; gap: 4px 8px; align-items: center; margin-top: 10px;
   font-variant-numeric: tabular-nums; font-size: 13px; }
 .rates > i { font-style: normal; font-weight: 700; color: var(--c); white-space: nowrap; }
 .rates > b { text-align: right; font-weight: 600; }
 .rates > img { width: 26px; height: 26px; image-rendering: pixelated; filter: saturate(.7) brightness(.92); }
 .rates .bar { height: 8px; }
 /* the game's rate label colours (Life Damage red, Guts Damage cyan, Critical yellow, Accuracy magenta) */
-.r-life { --g: #e83a3a; } .r-guts { --g: #22b8a8; } .r-crit { --g: #d8cf3a; } .r-acc { --g: #d8459e; }
-.s-POW, .s-LIF, .s-INT, .s-SKI, .s-DEF, .s-SPD, .r-life, .r-guts, .r-crit, .r-acc { --c: color-mix(in oklab, var(--g) var(--soft), var(--mute)); }
+.r-life { --g: #e83a3a; } .r-guts { --g: #22b8a8; } .r-crit { --g: #d8cf3a; } .r-acc { --g: #d8459e; } .r-cost { --g: #4f8fe6; }
+.s-POW, .s-LIF, .s-INT, .s-SKI, .s-DEF, .s-SPD, .r-life, .r-guts, .r-crit, .r-acc, .r-cost { --c: color-mix(in oklab, var(--g) var(--soft), var(--mute)); }
 .ico { width: 20px; height: 20px; vertical-align: middle; }
 .badge { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
 .iv { display: inline-flex; align-items: center; white-space: nowrap; }

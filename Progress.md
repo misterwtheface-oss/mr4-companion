@@ -73,6 +73,8 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Technique card: Guts Cost is its own magnitude bar (first rate row, blue, no letter: the game
+  has none for it), replacing the "GUTS n" text; effect line only when the technique has one.
 - 2026-11-08 [mr4.app] Technique rate bars now scale from the shown breeds' techniques only; monster and technique
   bars share one helper (magMax / magBar). New app rule A-magnitude-bars (rules.json). tools/app/shot.py clicks now
   wait for their selector (hash-routed overlays). Checked: Gigaload card = full Life / Guts / Accuracy, crit 22%.

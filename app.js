@@ -82,7 +82,7 @@
   const RATES = [['damage', 'Life Damage', 'r-life'], ['withering', 'Guts Damage', 'r-guts'],
     ['sharpness', 'Critical Hit Rate', 'r-crit'], ['hit', 'Accuracy Rate', 'r-acc']];
   // techniques shown = the shown groups' sets (Ape shares Garu's numbers)
-  const rateMax = magMax(shownGroups.filter((k) => k !== APE).flatMap((k) => techsOf(k)), RATES.map(([k]) => k), (t, k) => t[k]);
+  const rateMax = magMax(shownGroups.filter((k) => k !== APE).flatMap((k) => techsOf(k)), ['guts', ...RATES.map(([k]) => k)], (t, k) => t[k]);
   const skillGrid = (techs, sel) => `<div class="wgrid">${techs.filter((t) => t.slot < 12).map((t) =>
     `<button class="wcell${t === sel ? ' on' : ''}" data-tech="${t.id}" style="grid-area:${Math.floor(t.slot / 4) + 1}/${t.slot % 4 + 1}">` +
     `${ico(t.icon, 'waza', t.name)}</button>`).join('')}</div>`;
@@ -94,9 +94,9 @@
     const range = t.range != null ? `<span class="tt" style="--c1:${RANGE_C[t.range]};--c2:${RANGE_C[t.range + 1]}">${esc(D.meta.ranges[t.range])}</span>` : '';
     return `<div class="tcard"><div class="tc-h">${ico(t.icon, 'waza', t.name)}<div class="tc-n"><b>${esc(t.name)}</b>` +
       `<div class="tc-m">${type}${range}</div></div><span class="tc-i">${ico(c?.icon, 'ico')}${ico(e?.icon, 'ico', e?.name)}</span></div>` +
-      `<div class="tc-s"><span>${esc(TX.guts)} <b>${t.guts}</b></span>` +
-      (t.effect && t.effect !== 'NONE' ? `<span>${esc(TX.effects)} <b>${esc(t.effect)}</b></span>` : '') + '</div>' +
-      `<div class="rates">${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
+      (t.effect && t.effect !== 'NONE' ? `<div class="tc-s"><span>${esc(TX.effects)} <b>${esc(t.effect)}</b></span></div>` : '') +
+      // guts cost: own bar, no E..S letter in the game
+      `<div class="rates"><i class="r-cost">Guts Cost</i>${magBar(t.guts, rateMax.guts, 'r-cost')}<b>${t.guts}</b><span></span>${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
         magBar(t[k], rateMax[k], cls) +
         `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div>`;
   };
