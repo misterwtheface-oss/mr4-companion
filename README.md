@@ -10,7 +10,8 @@ Encyclopedia for **Monster Rancher 4** (PS2, Tecmo 2003): monsters, techniques, 
 - GitHub Pages from `main` at `/`; `.nojekyll` must stay at the root.
 - Cache busting (rule A-cache-bust): every local script / stylesheet in `index.html` carries `?v=<content hash>`,
   stamped by the shared `../tools/app/stamp_cache.py` from `tools/build_data.py` and from `.githooks/pre-commit` on
-  every commit. Once per clone: `git config core.hooksPath .githooks`. Never commit with `--no-verify`.
+  every commit; every image path comes from data.js with its own `?v=` (`ver()` in build_data.py), so app.js never
+  hand-writes an image path. Once per clone: `git config core.hooksPath .githooks`. Never commit with `--no-verify`.
 
 ## Data
 `python tools/build_data.py --strict` regenerates `data/data.js` and `assets/mon/` from the local-only datamine

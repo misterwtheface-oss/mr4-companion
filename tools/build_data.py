@@ -17,7 +17,7 @@ Every image carries a provenance tag in data.js (`img`: "render:<file>" or "none
 species name, a dangling id reference, or an image path in data.js that does not exist on disk.
 The extract itself is never copied here (G-extract-not-in-app).
 """
-import json, os, re, sys
+import hashlib, json, os, re, sys
 from PIL import Image
 
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,6 +56,12 @@ def crop_alpha(im, pad=6):
     return out
 
 
+def ver(rel):
+    """A-cache-bust: app-relative path + ?v=<content md5[:8]>, so a re-rendered picture gets a new URL."""
+    p = os.path.join(APP, rel)
+    return rel + "?v=" + hashlib.md5(open(p, "rb").read()).hexdigest()[:8] if os.path.exists(p) else rel
+
+
 def save_webp(im, path, size):
     im = im.copy()
     im.thumbnail((size, size), Image.LANCZOS)  # non-AI filter (G-no-ai-scaler)
@@ -91,7 +97,7 @@ def main():
             os.makedirs(os.path.dirname(os.path.join(APP, dst)), exist_ok=True)
             Image.open(src).save(os.path.join(APP, dst), optimize=True)
         shipped.append(dst)
-        return dst
+        return ver(dst)
 
     elements = [{"id": e["id"], "name": e["name"], "icon": icon(e["icon"])} for e in im_map["elements"]]
     categories = [{"id": c["id"], "icon": icon(c["icon"])} for c in im_map["categories"]]
@@ -134,6 +140,7 @@ def main():
         species.append({k: s[k] for k in ("id", "name", "main", "sub", "base", "grade", "growthMod", "growthType",
                                           "lifespan", "traits", "favItems", "startTechs")} |
                        {"img": img, "type": sp_type.get(sid), "book": b["routes"] if b else None,
+                        "pic": [ver(f"assets/mon/{sid}.webp"), ver(f"assets/mon/s/{sid}.webp")] if img.startswith("render:") else None,
                         "disc": b["discObtainable"] if b else None})
 
     # ids 128-133: no name, not on the calendar (extract hygiene.txt)
@@ -187,7 +194,8 @@ def main():
         else:
             img = "none:missing-render"
             errors.append(f"item {iid} {i['name']}: model file {model_of[iid]} has no render")
-        items.append({k: i[k] for k in ("id", "name", "category", "kind", "price", "desc")} | {"img": img})
+        items.append({k: i[k] for k in ("id", "name", "category", "kind", "price", "desc")} | {"img": img,
+                      "pic": [ver(f"assets/item/{iid}.webp"), ver(f"assets/item/s/{iid}.webp")] if img.startswith("render:") else None})
 
     out = {
         "meta": {"game": d["meta"]["game"], "status": d["meta"]["status"],

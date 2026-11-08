@@ -32,7 +32,7 @@
 
   // ---- shared pieces ----
   const monImg = (s, small) => s.img.startsWith('render:')
-    ? `<img src="assets/mon/${small ? 's/' : ''}${s.id}.webp" alt="" loading="lazy">`
+    ? `<img src="${s.pic[small ? 1 : 0]}" alt="" loading="lazy">`
     : `<div class="noimg">no render</div>`;
   const link = (kind, id, label, cls = 'chip', pre = '') =>
     `<button class="${cls}" data-open="${kind}:${id}">${pre}${esc(label)}</button>`;
@@ -43,7 +43,7 @@
   const waza = (t, s) => ico(s && t.iconApe && s.main === t.genus && APE_SUBS.includes(s.sub) ? t.iconApe : t.icon, 'waza');
   const elemIco = (t) => ico(ELEM[t.element]?.icon, 'ico', ELEM[t.element]?.name);
   const itemImg = (i, small) => i.img.startsWith('render:')
-    ? `<img class="${small ? 'ithumb' : ''}" src="assets/item/${small ? 's/' : ''}${i.id}.webp" alt="" loading="lazy">`
+    ? `<img class="${small ? 'ithumb' : ''}" src="${i.pic[small ? 1 : 0]}" alt="" loading="lazy">`
     : (small ? '<span class="ithumb"></span>' : '');
   const typeTag = (t) => `<span class="tag t${t.type}">${TECH_TYPE[t.type] ?? t.type}</span>`;
   const techLine = (t) => (t.range != null ? `${esc(D.meta.ranges[t.range])} · ` : '') + `${t.guts} guts · hit ${t.hit} · dmg ${t.damage} · wither ${t.withering}` +
@@ -156,7 +156,7 @@
               ['Damage', t.damage], ['Withering', t.withering], ['Sharpness', t.sharpness],
               ['Heal', t.heal ? t.heal + '% life' : null], ['Follow-up', t.followup ? 'partner joins' : null]]) +
           section('Known from birth by', start.length && `<div class="chips">${start.map((s) =>
-            link('mon', s.id, s.name, 'chip', s.img.startsWith('render:') ? `<img class="mini" src="assets/mon/s/${s.id}.webp" alt="">` : '')).join('')}</div>`),
+            link('mon', s.id, s.name, 'chip', s.img.startsWith('render:') ? `<img class="mini" src="${s.pic[1]}" alt="">` : '')).join('')}</div>`),
       };
     },
     item(i) {
@@ -165,7 +165,7 @@
         body: `<div class="hero">${itemImg(i)}<div><h2>${esc(i.name)}</h2><p class="desc">${esc(i.desc)}</p></div></div>` +
           kv([['Type', ITEM_CAT[i.category] ?? i.category], ['Price', i.price ? i.price + ' G' : null]]) +
           section('Favourite of', (likedBy[i.id] || []).length && `<div class="chips">${likedBy[i.id].map((s) =>
-            link('mon', s, SP[s].name, 'chip', SP[s].img.startsWith('render:') ? `<img class="mini" src="assets/mon/s/${s}.webp" alt="">` : '')).join('')}</div>`) +
+            link('mon', s, SP[s].name, 'chip', SP[s].img.startsWith('render:') ? `<img class="mini" src="${SP[s].pic[1]}" alt="">` : '')).join('')}</div>`) +
           section('Tournament prize', (prizeOf[i.id] || []).length && `<div class="chips">${prizeOf[i.id].map((t) => link('tour', t, TO[t].name)).join('')}</div>`),
       };
     },
