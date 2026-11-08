@@ -38,6 +38,11 @@ Backlog (user, 2026-11-08):
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
 
 ## Session log
+- 2026-11-08 [mr4.app] changed app.js, styles.css, index.html, tools/build_data.py, data.js, assets/icon/breed (new);
+  extract tools/icon_map.py, APP.md § Icon map, REQUESTS.md. What changed and why: user's layout spec: breed face grid
+  (game's res 0x8A faces found in the ELF), breed overlay with Monsters / Breed toggle, monster rows with picture + stat
+  bars + growth grade; live. Open after this session: backlog in Progress.md § Open (traits, in-game technique panels,
+  emblem UI container, stat modifier) and the per-monster detail choice.
 - 2026-11-08 [mr4.app] Icon map decoded from game code (extract `tools/icon_map.py`, APP.md § Icon map): technique
   pictograms (breed set + slot), item models (file 0x247 + id), element / category / type / rank icons, range and
   element names.
