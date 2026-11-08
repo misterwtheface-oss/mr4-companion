@@ -62,11 +62,14 @@
   }
 
   // ---- breed overlay ----
+  // magnitude bar = share of that stat's largest base among the monsters shown (as the technique rate bars)
+  const statMax = Object.fromEntries(STATS.map((x) => [x, Math.max(...Object.entries(members)
+    .filter(([k]) => k !== SPECIAL || FEATURES.bosses).flatMap(([, l]) => l.map((s) => s.base[x])))]));
   // stat colours = the Mon info stat labels (POW red, LIF orange, INT green, ACC = SKI magenta, DEF blue, SPD cyan)
   const monRow = (s) =>
     `<div class="mrow"><div class="mrow-h">${pair(s)}<b>${esc(s.name)}</b></div>` +
     `<div class="mrow-b"><div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
-    STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b><div class="bar s-${x}"><i style="width:${Math.min(100, s.base[x] / 3)}%"></i></div>` +
+    STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b><div class="bar s-${x}"><i style="width:${Math.round(s.base[x] / statMax[x] * 100)}%"></i></div>` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>`).join('') +
     '</div></div></div></div>';
 

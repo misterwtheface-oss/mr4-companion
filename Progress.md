@@ -73,6 +73,8 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Monster stat bars: were a fixed 0..300 scale (base/3, undocumented, never full); now share of
+  that stat's largest base among shown monsters (user pick; matches the technique rate bars and the State note).
 - 2026-11-08 [mr4.app] NPC filter: flat-100 normal-breed monsters hidden behind FEATURES.npcs (user request; data kept).
   Checked by page dump: Pixie / Golem / Hare / Durahan / Pancho / Ripper lists lose exactly those 7.
 - 2026-11-08 [mr4.app] Lit renders shipped (live 070ebe1). What changed and why: task MR4_rerender_lit rendered all
