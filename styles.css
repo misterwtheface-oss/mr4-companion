@@ -39,6 +39,17 @@ main { padding: 10px; }
 .row-h { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
 .row-h b { font-weight: 600; }
 .row-s { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.row.pic { display: flex; gap: 10px; align-items: center; }
+.row-m { flex: 1; min-width: 0; }
+.row-r { display: inline-flex; gap: 6px; align-items: center; flex: none; }
+/* technique pictograms are black line art: give them the light plate the game draws them on */
+.waza { width: 48px; height: 32px; flex: none; background: #d8dde1; border-radius: 6px; image-rendering: pixelated; }
+h2 .waza { vertical-align: middle; margin-right: 8px; }
+.chip .waza { width: 30px; height: 20px; vertical-align: middle; margin: -3px 6px -3px -6px; }
+.ico { width: 20px; height: 20px; vertical-align: middle; margin-right: 4px; }
+.badge { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
+.iv { display: inline-flex; align-items: center; white-space: nowrap; }
+.ithumb { width: 48px; height: 48px; flex: none; object-fit: contain; display: inline-block; }
 .tag { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px;
   background: var(--panel2); color: var(--steel); border: 1px solid var(--line); }
 .tag.t0 { color: var(--bronze); } .tag.t1 { color: var(--teal); }

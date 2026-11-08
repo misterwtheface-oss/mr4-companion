@@ -4,9 +4,13 @@
 
 Reads  ../_mr4_extract/web/data.js            (window.MR4_DATA, tools/build_data_js.py in the extract)
        ../_mr4_extract/assets/renders/mr4/    (<species>_<Name>_35.png, 512 px 3/4 view, xgame_renders.py)
+       ../_mr4_extract/data/assets/icon_map.json + assets/icons/   (code-backed icon map, tools/icon_map.py)
+       ../_mr4_extract/assets/renders/mr4_items/  (<id>_<Name>_35.png, tools/item_renders.py)
 Writes data/data.js                           (window.MR4_DATA, only the fields the app reads)
        assets/mon/<species>.webp              (detail image, 384 px)
        assets/mon/s/<species>.webp            (list thumbnail, 96 px)
+       assets/item/<id>.webp, assets/item/s/<id>.webp   (item render, 256 / 64 px)
+       assets/icon/waza/<set>_<slot>.png, assets/icon/ui/<tex>.png   (technique pictograms; element / category / type icons)
 
 Every image carries a provenance tag in data.js (`img`: "render:<file>" or "none:<reason>"); there is no fallback image.
 --strict fails the build on any error: a reachable species without a render, a render whose name differs from the
@@ -20,7 +24,12 @@ APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 X = os.path.join(os.path.dirname(APP), "_mr4_extract")
 SRC = os.path.join(X, "web", "data.js")
 RENDERS = os.path.join(X, "assets", "renders", "mr4")
+ITEM_RENDERS = os.path.join(X, "assets", "renders", "mr4_items")
+ICON_MAP = os.path.join(X, "data", "assets", "icon_map.json")
+ICONS = os.path.join(X, "assets", "icons")
 MON = os.path.join(APP, "assets", "mon")
+ITEM = os.path.join(APP, "assets", "item")
+ITEM_DETAIL, ITEM_THUMB = 256, 64
 STATS = ["POW", "INT", "SKI", "SPD", "DEF", "LIF"]
 DETAIL, THUMB = 384, 96
 
@@ -64,6 +73,32 @@ def main():
         if m:
             renders[int(m.group(1))] = (f, m.group(2))
 
+    im_map = json.load(open(ICON_MAP, encoding="utf-8"))
+    errors.extend("icon_map: " + e for e in im_map["errors"])
+    sk = {(r["genus"], r["slot"]): r for r in
+          json.load(open(os.path.join(X, "data", "battle", "techniques.json"), encoding="utf-8"))["records"]}
+    sp_raw = json.load(open(os.path.join(X, "data", "monster", "species.json"), encoding="utf-8"))
+    sp_type = {r["index"]: r["var_A9"] for r in (sp_raw if isinstance(sp_raw, list) else sp_raw["records"])}
+    shipped = []   # every icon / picture path data.js references (404 guard below)
+
+    def icon(rel):   # rel = "ui/ui_116.png" | "waza/set00_00.png" -> app path (copied), provenance = icon_map row
+        src = os.path.join(ICONS, rel)
+        if not os.path.exists(src):
+            errors.append(f"icon source missing: {rel}")
+            return None
+        dst = "assets/icon/" + rel.replace("ui/ui_", "ui/").replace("waza/set", "waza/")
+        if images:
+            os.makedirs(os.path.dirname(os.path.join(APP, dst)), exist_ok=True)
+            Image.open(src).save(os.path.join(APP, dst), optimize=True)
+        shipped.append(dst)
+        return dst
+
+    elements = [{"id": e["id"], "name": e["name"], "icon": icon(e["icon"])} for e in im_map["elements"]]
+    categories = [{"id": c["id"], "icon": icon(c["icon"])} for c in im_map["categories"]]
+    mon_types = [{"id": t["id"], "name": t["label"], "icon": icon(t["icon"])} for t in im_map["monster_types"]]
+    ranges = {int(k): v for k, v in im_map["texts"]["technique_range"].items()}
+    tech_icon = {t["id"]: t for t in im_map["techniques"]}
+
     item_ids = {i["id"] for i in d["items"]}
     tech_ids = {t["id"] for t in d["techniques"]}
     trait_ids = {t["id"] for t in d["traits"]}
@@ -98,7 +133,7 @@ def main():
         b = book.get(sid)
         species.append({k: s[k] for k in ("id", "name", "main", "sub", "base", "grade", "growthMod", "growthType",
                                           "lifespan", "traits", "favItems", "startTechs")} |
-                       {"img": img, "book": b["routes"] if b else None,
+                       {"img": img, "type": sp_type.get(sid), "book": b["routes"] if b else None,
                         "disc": b["discObtainable"] if b else None})
 
     # ids 128-133: no name, not on the calendar (extract hygiene.txt)
@@ -110,15 +145,59 @@ def main():
         if t["prizeItem"] is not None and t["prizeItem"] not in item_ids:
             errors.append(f"tournament {t['id']}: prize item {t['prizeItem']} not found")
 
+    techniques = []
+    for t in d["techniques"]:
+        r = sk.get((t["genus"], t["slot"]))
+        ti = tech_icon.get(t["id"])
+        if r is None or ti is None or ti["name"] != t["name"]:
+            errors.append(f"technique {t['id']} {t['name']}: MONSKILL record or icon map row missing / renamed")
+            r, ti = r or {}, {}
+        techniques.append({k: t[k] for k in ("id", "genus", "slot", "name", "type", "guts", "hit", "sharpness",
+                                              "damage", "withering", "heal", "followup", "element", "category")} |
+                          {"range": r.get("power_class") if r.get("power_class") in ranges else None,
+                           "icon": icon(ti["icon"]) if ti.get("icon") else None,
+                           "iconApe": icon(ti["icon_ape"]) if ti.get("icon_ape") else None})
+
+    item_renders = {}
+    if os.path.isdir(ITEM_RENDERS):
+        for f in os.listdir(ITEM_RENDERS):
+            m = re.match(r"(\d{3})_(.+)_35\.png$", f)
+            if m:
+                item_renders[int(m.group(1))] = (f, m.group(2))
+    if images:
+        os.makedirs(os.path.join(ITEM, "s"), exist_ok=True)
+    model_of = {i["id"]: i["model_file"] for i in im_map["items"]}
+    items = []
+    for i in d["items"]:
+        iid = i["id"]
+        if model_of.get(iid) is None:
+            img = "none:no-model"
+            if i["name"] and i["name"] != "(NONE)":
+                warnings.append(f"item {iid} {i['name']}: {img}")
+        elif iid in item_renders:
+            f, rname = item_renders[iid]
+            if norm(rname) != norm(i["name"]):
+                errors.append(f"item {iid} {i['name']}: render name {rname}")
+            img = f"render:{f}"
+            if images:
+                im = crop_alpha(Image.open(os.path.join(ITEM_RENDERS, f)).convert("RGBA"))
+                save_webp(im, os.path.join(ITEM, f"{iid}.webp"), ITEM_DETAIL)
+                save_webp(im, os.path.join(ITEM, "s", f"{iid}.webp"), ITEM_THUMB)
+            shipped += [f"assets/item/{iid}.webp", f"assets/item/s/{iid}.webp"]
+        else:
+            img = "none:missing-render"
+            errors.append(f"item {iid} {i['name']}: model file {model_of[iid]} has no render")
+        items.append({k: i[k] for k in ("id", "name", "category", "kind", "price", "desc")} | {"img": img})
+
     out = {
         "meta": {"game": d["meta"]["game"], "status": d["meta"]["status"],
-                 "source": d["meta"]["generatedAt"], "stats": STATS, "statNames": d["meta"]["statNames"]},
+                 "source": d["meta"]["generatedAt"], "stats": STATS, "statNames": d["meta"]["statNames"],
+                 "elements": elements, "categories": categories, "monTypes": mon_types, "ranges": ranges},
         "breeds": d["breeds"],
         "species": species,
-        "techniques": [{k: t[k] for k in ("id", "genus", "slot", "name", "type", "guts", "hit", "sharpness",
-                                          "damage", "withering", "heal", "followup")} for t in d["techniques"]],
+        "techniques": techniques,
         "traits": [{k: t[k] for k in ("id", "name", "desc")} for t in d["traits"]],
-        "items": [{k: i[k] for k in ("id", "name", "category", "kind", "price", "desc")} for i in d["items"]],
+        "items": items,
         "tournaments": [{k: t[k] for k in ("id", "name", "rank", "format", "entrants", "official", "monstersNeeded",
                                            "prizeMoney", "prizeItem", "opponents")} for t in tournaments],
         "calendar": d["calendar"],
@@ -130,6 +209,9 @@ def main():
             for p in (f"{s['id']}.webp", f"s/{s['id']}.webp"):
                 if not os.path.exists(os.path.join(MON, p)):
                     errors.append(f"species {s['id']}: assets/mon/{p} missing on disk")
+    for p in sorted(set(shipped)):   # icons and item pictures
+        if not os.path.exists(os.path.join(APP, p)):
+            errors.append(f"{p} missing on disk")
 
     os.makedirs(os.path.join(APP, "data"), exist_ok=True)
     with open(os.path.join(APP, "data", "data.js"), "w", encoding="utf-8", newline="\n") as fh:

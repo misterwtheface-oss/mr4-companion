@@ -8,16 +8,22 @@
   push; Cloudflare beacon not added until public release).
 
 ## Open
-- [ ] Item pictures: MR4 items are 3D models (MO4_ITEM = model textures, not icons); render them like the monsters.
-- [ ] Technique icons: 408 pictograms in MON_WZP (64x32); the technique -> icon lookup is not decoded (no guessing).
-- [ ] Technique element / category names (MF4_MSG) not decoded; shown fields are guts, hit, damage, withering,
-      sharpness, heal, follow-up.
+- [x] Item pictures: 498 item renders (item id -> model file 0x247 + id) in lists and detail; Envelopes / "(NONE)"
+      have no model. Re-render: `_mr4_extract/tools/item_renders.py all` (task MR4_item_renders).
+- [x] Icons: technique pictograms (lists, detail, monster technique chips; Ape variants use their own set), element
+      icon + name, category icon, range, monster type badge. Rank icons are mapped (icon_map.json) but not used yet.
 - [ ] Stat grade scale and growth type meaning: shown as raw numbers.
 - [ ] Book routes: real album titles for discs; "From Book" stat generation (extract REQUESTS / 05_summon Q5).
 - [ ] Planner features (raising, combining) after the encyclopedia.
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
 
 ## Session log
+- 2026-11-08 [mr4.app] Icon map decoded from game code (extract `tools/icon_map.py`, APP.md § Icon map): technique
+  pictograms (breed set + slot), item models (file 0x247 + id), element / category / type / rank icons, range and
+  element names.
+- 2026-11-08 [mr4.app] Icons and item pictures live in the app: 498 item renders (Task Scheduler; the shared
+  Blender framing gained `trim_outliers: false` because it clipped long items like tablets), technique pictograms,
+  element / category / type icons, range names. Full build = task MR4_app_build (tools/build_data_task.cmd).
 - 2026-11-08 [mr4.app] What changed and why: v1 encyclopedia built and published (user: encyclopedia first, repo
   mr4-companion); kit gained tools/app/shot.py for phone-width checks. Open after this session: item pictures,
   technique icon lookup, element/category names (list above).

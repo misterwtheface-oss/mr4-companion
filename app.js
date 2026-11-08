@@ -9,6 +9,8 @@
   const SP = by(D.species), TE = by(D.techniques), IT = by(D.items), TR = by(D.traits),
         TO = by(D.tournaments), EN = by(D.enemies), BR = by(D.breeds);
   const STATS = D.meta.stats;
+  const ELEM = by(D.meta.elements), CAT = by(D.meta.categories), MTYPE = by(D.meta.monTypes);
+  const APE_SUBS = [35, 36, 37];   // Garu-main Ape variants draw the extra pictogram set (extract APP.md § Icon map)
   const TECH_TYPE = { 0: 'Power', 1: 'Intelligence', 6: 'Intelligence, all', 3: 'Team special', 2: 'Action', 4: 'Action', 5: 'Action' };
   const ITEM_CAT = { consumable: 'Consumables', goods: 'Goods', facility_plan: 'Facility plans',
                      breed_catalyst: 'Catalysts', breed_stone: 'Stones' };
@@ -34,11 +36,17 @@
     : `<div class="noimg">no render</div>`;
   const link = (kind, id, label, cls = 'chip', pre = '') =>
     `<button class="${cls}" data-open="${kind}:${id}">${pre}${esc(label)}</button>`;
-  const row = (kind, id, title, right, sub) =>
-    `<div class="row" data-open="${kind}:${id}"><div class="row-h"><b>${esc(title)}</b>${right || ''}</div>` +
-    (sub ? `<div class="row-s">${sub}</div>` : '') + '</div>';
+  const row = (kind, id, title, right, sub, pic) =>
+    `<div class="row${pic ? ' pic' : ''}" data-open="${kind}:${id}">${pic || ''}<div class="row-m"><div class="row-h"><b>${esc(title)}</b>${right || ''}</div>` +
+    (sub ? `<div class="row-s">${sub}</div>` : '') + '</div></div>';
+  const ico = (src, cls = 'ico', title = '') => src ? `<img class="${cls}" src="${src}" alt="${esc(title)}" title="${esc(title)}">` : '';
+  const waza = (t, s) => ico(s && t.iconApe && s.main === t.genus && APE_SUBS.includes(s.sub) ? t.iconApe : t.icon, 'waza');
+  const elemIco = (t) => ico(ELEM[t.element]?.icon, 'ico', ELEM[t.element]?.name);
+  const itemImg = (i, small) => i.img.startsWith('render:')
+    ? `<img class="${small ? 'ithumb' : ''}" src="assets/item/${small ? 's/' : ''}${i.id}.webp" alt="" loading="lazy">`
+    : (small ? '<span class="ithumb"></span>' : '');
   const typeTag = (t) => `<span class="tag t${t.type}">${TECH_TYPE[t.type] ?? t.type}</span>`;
-  const techLine = (t) => `${t.guts} guts · hit ${t.hit} · dmg ${t.damage} · wither ${t.withering}` +
+  const techLine = (t) => (t.range != null ? `${esc(D.meta.ranges[t.range])} · ` : '') + `${t.guts} guts · hit ${t.hit} · dmg ${t.damage} · wither ${t.withering}` +
     (t.heal ? ` · heal ${t.heal}%` : '');
   const section = (title, body) => body ? `<div class="sec"><h3>${title}</h3>${body}</div>` : '';
   const kv = (pairs) => `<div class="kv">${pairs.filter((p) => p[1] != null && p[1] !== '')
@@ -77,7 +85,8 @@
         const list = D.techniques.filter((t) => (f === '' || t.genus === +f) &&
           (ty === '' || (ty === 'x' ? t.type > 1 : t.type === +ty)) && match(q, t.name, breedName(t.genus)));
         return groups(list, (t) => t.genus, (k) => breedName(k) ?? `Genus ${k}`,
-          (t) => row('tech', t.id, t.name, typeTag(t), techLine(t)), (h) => `<div class="list">${h}</div>`);
+          (t) => row('tech', t.id, t.name, `<span class="row-r">${elemIco(t)}${typeTag(t)}</span>`, techLine(t), waza(t)),
+          (h) => `<div class="list">${h}</div>`);
       },
     },
     items: {
@@ -86,7 +95,7 @@
         const c = st.f.cat ?? '';
         const list = D.items.filter((i) => i.name && (c === '' || i.category === c) && match(q, i.name, i.desc));
         return groups(list, (i) => i.category, (k) => ITEM_CAT[k] ?? k,
-          (i) => row('item', i.id, i.name, i.price ? `<span class="tag">${i.price} G</span>` : '', esc(i.desc)),
+          (i) => row('item', i.id, i.name, i.price ? `<span class="tag">${i.price} G</span>` : '', esc(i.desc), itemImg(i, true)),
           (h) => `<div class="list">${h}</div>`);
       },
     },
@@ -114,13 +123,14 @@
           `<td>${s.grade[k]}</td><td class="${s.growthMod[k] < 0 ? 'neg' : s.growthMod[k] > 0 ? 'pos' : ''}">` +
           `${s.growthMod[k] > 0 ? '+' : ''}${s.growthMod[k]}</td></tr>`).join('') + '</tbody></table>';
       const techs = s.main == null ? '' : techsOf(s.main).map((t) =>
-        link('tech', t.id, t.name, (s.startTechs || []).includes(t.id) ? 'chip start' : 'chip')).join('');
+        link('tech', t.id, t.name, (s.startTechs || []).includes(t.id) ? 'chip start' : 'chip', waza(t, s))).join('');
       return {
         title: s.name,
         body: `<div class="hero">${monImg(s)}<div><h2>${esc(s.name)}</h2><div class="sub">` +
           `${s.main != null ? link('breed', s.main, breedName(s.main), 'chip') : ''}` +
           `${s.sub !== s.main && breedName(s.sub) ? ' / ' + esc(breedName(s.sub)) : ''}</div>` +
-          kv([['Life points', s.lifespan], ['Growth type', s.growthType]]) + '</div></div>' +
+          kv([['Type', MTYPE[s.type] ? `<span class="iv">${ico(MTYPE[s.type].icon, 'badge', MTYPE[s.type].name)}${esc(MTYPE[s.type].name)}</span>` : null],
+              ['Life points', s.lifespan], ['Growth type', s.growthType]]) + '</div></div>' +
           section('Stats', stats) +
           section('Traits', (s.traits || []).map((i) => `<div><b>${esc(TR[i].name)}</b> <span class="desc">${esc(TR[i].desc)}</span></div>`).join('')) +
           section('Favourite items', `<div class="chips">${(s.favItems || []).map((i) => link('item', i, IT[i].name)).join('')}</div>`) +
@@ -138,8 +148,11 @@
       const start = users.filter((s) => (s.startTechs || []).includes(t.id));
       return {
         title: t.name,
-        body: `<div class="row-h"><h2 style="margin:0">${esc(t.name)}</h2>${typeTag(t)}</div>` +
-          kv([['Breed', link('breed', t.genus, breedName(t.genus), 'chip')], ['Guts', t.guts], ['Hit', t.hit + '%'],
+        body: `<div class="row-h"><h2 style="margin:0">${waza(t)}${esc(t.name)}</h2>${typeTag(t)}</div>` +
+          kv([['Breed', link('breed', t.genus, breedName(t.genus), 'chip')],
+              ['Element', ELEM[t.element] ? `<span class="iv">${elemIco(t)}${esc(ELEM[t.element].name)}</span>` : null],
+              ['Category', CAT[t.category]?.icon ? ico(CAT[t.category].icon) : null],
+              ['Range', t.range != null ? esc(D.meta.ranges[t.range]) : null], ['Guts', t.guts], ['Hit', t.hit + '%'],
               ['Damage', t.damage], ['Withering', t.withering], ['Sharpness', t.sharpness],
               ['Heal', t.heal ? t.heal + '% life' : null], ['Follow-up', t.followup ? 'partner joins' : null]]) +
           section('Known from birth by', start.length && `<div class="chips">${start.map((s) =>
@@ -149,7 +162,7 @@
     item(i) {
       return {
         title: i.name,
-        body: `<h2 style="margin:0">${esc(i.name)}</h2><p class="desc">${esc(i.desc)}</p>` +
+        body: `<div class="hero">${itemImg(i)}<div><h2>${esc(i.name)}</h2><p class="desc">${esc(i.desc)}</p></div></div>` +
           kv([['Type', ITEM_CAT[i.category] ?? i.category], ['Price', i.price ? i.price + ' G' : null]]) +
           section('Favourite of', (likedBy[i.id] || []).length && `<div class="chips">${likedBy[i.id].map((s) =>
             link('mon', s, SP[s].name, 'chip', SP[s].img.startsWith('render:') ? `<img class="mini" src="assets/mon/s/${s}.webp" alt="">` : '')).join('')}</div>`) +

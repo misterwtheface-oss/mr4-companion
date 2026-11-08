@@ -17,5 +17,11 @@ Encyclopedia for **Monster Rancher 4** (PS2, Tecmo 2003): monsters, techniques, 
 Image resizing uses Lanczos (no AI upscalers). The full image pass took ~20 min on 2026-11-08 (PC busy): run it
 through Task Scheduler; `--no-images` rebuilds data.js alone in seconds.
 
+Icons and item pictures come from the extract's code-backed icon map (`_mr4_extract/tools/icon_map.py`, extract
+APP.md § Icon map): technique pictograms (breed set + slot; the three Ape variants use their own set), element,
+category and monster type icons, range names. Items are 3D models in the game, so item pictures are our renders
+(`_mr4_extract/tools/item_renders.py`, task MR4_item_renders); the 2 Envelopes and the "(NONE)" fillers have no model.
+Every shipped icon / picture path is checked on disk (`--strict`).
+
 Field notes: lifespan is in the game's life points (10-15 lost per week); stat grades are the raw species values;
-technique element and category are not shown because their player-facing names are not decoded yet.
+technique categories have no name text in the game, so only their icon is shown.
