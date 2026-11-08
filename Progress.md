@@ -14,6 +14,16 @@
   stays in data.js for later features).
 
 ## Open
+Backlog (user, 2026-11-08):
+- [ ] How traits work: decode res 0xF1 (kind + 4 x (effect, value)) and the battle / training consumers into plain
+      words per trait (extract 01_monster § 4.4, 03_battle).
+- [ ] Technique panels drawn like the game's (border, container, backfill): find the technique-page frame textures
+      (Mon info technique page 0x11b8e8 / slot draw 0x11c218) and rebuild the panel from them.
+- [ ] Breed emblems inside the game's UI container: find the frame the faces sit in on screen (draw site of res 0x8A,
+      extract REQUESTS) and use it.
+- [ ] Bring back the per-stat modifier next to the grade (old monster page "Growth" column, species growthMod -8..8,
+      = 2 x (grade - 5) on 97% of records; meaning not decoded: battle / training handoff, extract 01_monster var
+      0x34-0x39). Decide its label once the meaning is known.
 - [ ] Per-monster extras (user decides what to show): traits, favourite items, likes / dislikes by food and item
       category (species.json food_cat / item_cat, not yet in data.js), like levels (battles, rest), personality odds
       (mix of main and sub breed tables). Personality names and food-category names still need decoding.
