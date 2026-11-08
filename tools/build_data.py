@@ -48,6 +48,26 @@ def load_js(path):
     return json.loads(s[s.index("{"):s.rindex("}") + 1])
 
 
+def crop_model(im, pad=6, haze=30):
+    """Lit renders (Cycles shadow catcher): shadow pixels are black with partial alpha and a faint haze covers the whole
+    frame. Drop the haze (alpha below `haze` on shadow pixels, the rest rescaled), then square-crop to the model only
+    (alpha >= 250): the frame follows the monster, whatever shadow falls inside stays (user 2026-11-08)."""
+    import numpy as np
+    a = np.asarray(im).copy()
+    sh = (a[..., :3].max(-1) < 8) & (a[..., 3] < 255)
+    a[..., 3] = np.where(sh, np.clip((a[..., 3].astype(int) - haze) * 255 // (255 - haze), 0, 255), a[..., 3])
+    im = Image.fromarray(a, "RGBA")
+    box = Image.fromarray(((a[..., 3] >= 250) * 255).astype("uint8")).getbbox()
+    if not box:
+        return crop_alpha(im, pad)
+    l, t, r, b = box
+    side = max(r - l, b - t) + 2 * pad
+    cx, cy = (l + r) // 2, (t + b) // 2
+    out = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    out.alpha_composite(im.crop((cx - side // 2, cy - side // 2, cx - side // 2 + side, cy - side // 2 + side)))
+    return out
+
+
 def crop_alpha(im, pad=6):
     box = im.getchannel("A").getbbox()
     if not box:
@@ -136,6 +156,10 @@ def main():
     def waza_rank(col, v):   # DB_CsvFindRow: first row r with t[r+1][col] > v, else the last row; 0..5 = E..S
         c = wr["cols"].index(col)
         return next((r for r in range(len(wr["rows"]) - 1) if wr["rows"][r + 1][c] > v), len(wr["rows"]) - 1)
+    # Ape variants (Garu 0x1A + sub 0x23..0x25) use Garu's MONSKILL records but their own names (Mon_TechNameText:
+    # msg 0xE3[0x22A + slot]) and pictures (last MON_WZP set, FUN_0028e938)
+    msg_e3 = {e["i"]: e["text"] for e in
+              json.load(open(os.path.join(X, "data", "core", "text_e3.json"), encoding="utf-8"))["strings"]}
     msg_db = {e["i"]: e["text"] for e in
               json.load(open(os.path.join(X, "data", "core", "text_db.json"), encoding="utf-8"))["strings"]}
 
@@ -159,7 +183,7 @@ def main():
                 errors.append(f"species {sid} {s['name']}: render name {rname}")
             img = f"render:{f}"
             if images:
-                im = crop_alpha(Image.open(os.path.join(RENDERS, f)).convert("RGBA"))
+                im = crop_model(Image.open(os.path.join(RENDERS, f)).convert("RGBA"))
                 save_webp(im, os.path.join(MON, f"{sid}.webp"), DETAIL)
                 save_webp(im, os.path.join(MON, "s", f"{sid}.webp"), THUMB)
         else:
@@ -200,6 +224,7 @@ def main():
                            # Mon info detail (FUN_0011c998): "Added Effects" = msg 0xDB[0xAF + effect_code] (< 0x22)
                            "effect": msg_db.get(0xAF + r["effect_code"]) if 0 <= r.get("effect_code", -1) < 0x22 else None,
                            "rank": {c: waza_rank(c, t[c]) for c in wr["cols"]},
+                           "nameApe": msg_e3.get(0x22A + t["slot"]) if t["genus"] == 0x1A else None,
                            "icon": icon(ti["icon"]) if ti.get("icon") else None,
                            "iconApe": icon(ti["icon_ape"]) if ti.get("icon_ape") else None})
 

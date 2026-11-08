@@ -1,7 +1,9 @@
 (() => {
   'use strict';
   const D = window.MR4_DATA;
-  const FEATURES = {};
+  // bosses: the 5 special-main monsters (King Shiden, Don Mudleone, Garp, Zevion x2) are not obtainable by the player
+  // (never from a disc, no Book route, pure only, boss-like records; extract 05_summon § 1.7)
+  const FEATURES = { bosses: false };
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const by = (arr) => Object.fromEntries(arr.map((x) => [x.id, x]));
@@ -10,15 +12,22 @@
   const STATS = D.meta.stats;
   const ELEM = by(D.meta.elements), CAT = by(D.meta.categories), MTYPE = by(D.meta.monTypes);
   const SPECIAL = 'x';   // the 5 event monsters with no main breed
-  const breedName = (k) => (k === SPECIAL ? 'Special' : BR[k]?.name ?? '');
+  // Apes: main breed Garu (0x1A) with sub 0x23..0x25 in the game; their own faces, technique names and pictures, Garu's
+  // technique stats (Mon_SkillRecord by main) -> their own group here
+  const APE = 'ape', GARU = 26, isApe = (s) => s.main === GARU && s.sub >= 35 && s.sub <= 37;
+  const breedName = (k) => (k === SPECIAL ? 'Special' : k === APE ? 'Ape' : BR[k]?.name ?? '');
+  const groupOf = (s) => (s.main == null ? SPECIAL : isApe(s) ? APE : s.main);
 
   // monsters per main breed: pure breed first, then by sub breed
   const members = {};
-  D.species.forEach((s) => (members[s.main ?? SPECIAL] ||= []).push(s));
+  D.species.forEach((s) => (members[groupOf(s)] ||= []).push(s));
   Object.values(members).forEach((l) => l.sort((a, b) =>
     (b.sub === b.main) - (a.sub === a.main) || (a.sub ?? 99) - (b.sub ?? 99) || a.id - b.id));
-  const pureOf = (k) => members[k].find((s) => s.sub === s.main);
-  const techsOf = (k) => D.techniques.filter((t) => t.genus === +k).sort((a, b) => a.slot - b.slot);
+  const pureOf = (k) => (k === APE ? members[APE][0] : members[k].find((s) => s.sub === s.main));
+  const techsOf = (k) => (k === APE
+    ? techsOf(GARU).map((t) => ({ ...t, name: t.nameApe ?? t.name, icon: t.iconApe ?? t.icon }))
+    : D.techniques.filter((t) => t.genus === +k).sort((a, b) => a.slot - b.slot));
+  const groupIcon = (k) => (k === SPECIAL ? D.meta.specialIcon : k === APE ? members[APE][0].faces[0] : BR[k].icon);
 
   // ---- state (localStorage mr4c.state) ----
   const KEY = 'mr4c.state';
@@ -42,9 +51,10 @@
 
   // ---- main page: breed emblems ----
   function renderHome() {
-    const keys = [...D.breeds.map((b) => b.id), ...(members[SPECIAL] ? [SPECIAL] : [])];
+    const keys = D.breeds.flatMap((b) => (b.id === GARU && members[APE] ? [b.id, APE] : [b.id]))
+      .concat(FEATURES.bosses && members[SPECIAL] ? [SPECIAL] : []);
     $('#view').innerHTML = `<div class="emblems">${keys.map((k) =>
-      `<button class="emblem" data-breed="${k}">${emblem(k === SPECIAL ? D.meta.specialIcon : BR[k].icon, breedName(k))}` +
+      `<button class="emblem" data-breed="${k}">${emblem(groupIcon(k), breedName(k))}` +
       `<b>${esc(breedName(k))}</b></button>`).join('')}</div>`;
   }
 
@@ -97,9 +107,10 @@
   const open = { breed: null, scroll: {}, tech: {} };
   // select a technique in place (no re-render of the sheet: keeps the scroll position)
   function pickTech(id) {
-    const t = D.techniques.find((x) => x.id === id), page = $('.waza-page');
-    if (!t || !page) return;
-    const k = page.dataset.k, techs = techsOf(k);
+    const page = $('.waza-page');
+    if (!page) return;
+    const k = page.dataset.k === APE ? APE : +page.dataset.k, techs = techsOf(k), t = techs.find((x) => x.id === id);
+    if (!t) return;
     open.tech[k] = id;
     page.querySelector('.skills').innerHTML = skillGrid(techs, t);
     page.querySelector('.xtechs').innerHTML = extraTechs(techs, t);
@@ -122,9 +133,10 @@
   // ---- routing: #b/<breed> so the phone's Back button closes the overlay ----
   let pushed = false;
   function route() {
-    const m = location.hash.match(/^#b\/(\d+|x)$/);
+    const m = location.hash.match(/^#b\/(\d+|x|ape)$/);
     if (open.breed != null) open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;
-    open.breed = m && (m[1] === SPECIAL || BR[m[1]]) ? (m[1] === SPECIAL ? SPECIAL : +m[1]) : null;
+    const g = m && m[1];
+    open.breed = g === APE && members[APE] ? APE : g === SPECIAL && FEATURES.bosses ? SPECIAL : g && BR[g] ? +g : null;
     if (open.breed == null) pushed = false;
     showBreed();
   }

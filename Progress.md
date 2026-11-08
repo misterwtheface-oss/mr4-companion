@@ -35,7 +35,11 @@
   Palette rebuilt around the emblem (user): darker, calmer disc + muted brass ring; UI = navy-charcoal surfaces, one
   brass accent (--gold: active tab, selection, headings, high grades; replaces teal), ivory text (styles.css :root).
   Monster pictures sit on a lit neutral-slate stage with a CSS ground shadow + drop shadow (the renders are Blender
-  Workbench, studio light, no shadows). Open: optional re-render with cast shadows (shadow catcher), ~1 h Task Scheduler.
+  Workbench, studio light, no shadows).
+- 2026-11-08 (user review of renders): lit re-render (Cycles, cast + ground shadow) with per-breed pose / angle /
+  framing fixes and the untextured-part fix (extract APP.md § 3D monster renders); app crops to the model, keeps the
+  shadow inside that box (CSS shadows removed). Apes get their own "Ape" entry after Garu (Ape technique names and
+  pictures, Garu's technique stats; code-backed). The 5 special-main monsters are bosses: hidden (FEATURES.bosses).
 
 ## Open
 Backlog (user, 2026-11-08):

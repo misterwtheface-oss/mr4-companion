@@ -67,12 +67,10 @@ main { padding: 12px 10px; }
 .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
 .mrow-b { display: flex; gap: 10px; align-items: stretch; }
 .mrow-pic { flex: none; width: 124px; position: relative; overflow: hidden; border-radius: var(--r);   /* stats set the row height */
-  /* lit stage: the renders carry no shadow (Workbench studio light), so the container supplies light and ground */
+  /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
-.mrow-pic::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: 5%; height: 9%; border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(4, 8, 16, .55), rgba(4, 8, 16, 0)); }
-.mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 6px 4px 8% 4px; width: calc(100% - 8px); height: calc(92% - 6px);
-  object-fit: contain; object-position: 50% 100%; z-index: 1; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .45)); }
+.mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px);
+  object-fit: contain; object-position: 50% 100%; }   /* lit renders carry their own cast + ground shadow */
 .mrow-m { flex: 1; min-width: 0; }
 .mstats { display: grid; grid-template-columns: auto auto 1fr auto; gap: 2px 7px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }
