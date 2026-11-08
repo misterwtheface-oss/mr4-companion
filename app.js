@@ -76,14 +76,14 @@
   const GROWTH_TYPE = ['Early', 'Early-mid', 'Normal', 'Mid-late', 'Late', 'Steady'];
   const signed = (n) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0');
   const monRow = (s) =>
-    `<div class="mrow"><div class="mrow-h">${pair(s)}<b>${esc(s.name)}</b></div>` +
-    `<div class="mrow-b"><div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
+    `<div class="mrow"><div class="mcard"><div class="mcard-h">${pair(s)}</div><div class="mrow-pic">${monImg(s)}</div></div>` +
+    `<div class="mrow-m"><b class="mname">${esc(s.name)}</b><div class="mstats">` +
     '<i></i><i class="h">Base</i><i></i><i class="h">Growth</i>' +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>` +
       `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
     `</div><div class="mmeta"><span><i>Lifespan</i> ${s.lifespan}</span><span><i>Growth</i> ${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div>` +
-    '</div></div></div>';
+    '</div></div>';
 
   // techniques: pictogram grid by slot (as the game's Skills page), detail card for the selected one
   const RANGE_C = ['#f47468', '#f47468', '#f4dc64', '#f4dc64', '#78ec80', '#78ec80', '#78ec80', '#78ec80', '#78ec80'];

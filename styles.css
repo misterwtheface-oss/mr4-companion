@@ -55,11 +55,12 @@ main { padding: 12px 10px; }
 
 /* monster rows: picture at full row height, then per stat: label, base, magnitude bar, growth grade, gain % */
 .mlist { display: flex; flex-direction: column; }
-.mrow { padding: 8px 0; border-bottom: 1px solid var(--line); }
-/* header lines up with the body columns: main x sub emblems centred over the picture, name at the stats' left edge */
-.mrow-h { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-.mrow-h > .pair { width: 124px; justify-content: center; }
-.mrow-h > b { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mrow { display: flex; gap: 10px; align-items: stretch; padding: 8px 0; border-bottom: 1px solid var(--line); }
+/* one two-part box: main x sub emblems as its header, the render below; the name heads the stats column */
+.mcard { flex: none; width: 124px; display: flex; flex-direction: column; overflow: hidden;
+  border: 1px solid var(--gold); border-radius: var(--r); }
+.mcard-h { display: flex; justify-content: center; padding: 4px 0; background: var(--panel2); border-bottom: 1px solid var(--gold); }
+.mname { display: block; font-size: 15px; margin: 6px 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* main x sub: a gold "x" between the emblems, after the game's breed-row mark */
 .pair { display: inline-flex; align-items: center; gap: 2px; flex: none; }
 .x { position: relative; width: 16px; height: 16px; }
@@ -67,8 +68,7 @@ main { padding: 12px 10px; }
   background: linear-gradient(#e9d7a2, #c19a4e 55%, #7d5e26); box-shadow: 0 0 0 1px #2a1f0c;
   transform: translate(-50%, -50%) rotate(45deg); }
 .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
-.mrow-b { display: flex; gap: 10px; align-items: stretch; }
-.mrow-pic { flex: none; width: 124px; position: relative; overflow: hidden; border-radius: var(--r); border: 1px solid #4b5869;   /* stats set the row height */
+.mrow-pic { flex: 1; position: relative; overflow: hidden;   /* stats set the row height */
   /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
 .mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px);
