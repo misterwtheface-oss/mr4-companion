@@ -54,8 +54,8 @@ main { padding: 12px 10px; }
 .sheet-body { flex: 1; overflow-y: auto; padding: 0 12px 24px; border-top: 1px solid var(--line); }
 
 /* monster rows: picture at full row height, then per stat: label, base, magnitude bar, growth grade, gain % */
-.mlist { display: flex; flex-direction: column; gap: 8px; }
-.mrow { padding: 8px; border: 1px solid var(--line); border-radius: var(--r); }
+.mlist { display: flex; flex-direction: column; }
+.mrow { padding: 8px 0; border-bottom: 1px solid var(--line); }
 /* header lines up with the body columns: main x sub emblems centred over the picture, name at the stats' left edge */
 .mrow-h { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .mrow-h > .pair { width: 124px; justify-content: center; }
@@ -68,7 +68,7 @@ main { padding: 12px 10px; }
   transform: translate(-50%, -50%) rotate(45deg); }
 .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
 .mrow-b { display: flex; gap: 10px; align-items: stretch; }
-.mrow-pic { flex: none; width: 124px; position: relative; overflow: hidden; border-radius: var(--r);   /* stats set the row height */
+.mrow-pic { flex: none; width: 124px; position: relative; overflow: hidden; border-radius: var(--r); border: 1px solid #4b5869;   /* stats set the row height */
   /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
 .mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px);

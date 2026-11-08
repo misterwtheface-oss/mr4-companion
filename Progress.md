@@ -78,7 +78,7 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
-- 2026-11-08 [mr4.app] Monster cards bordered; emblem pair centred over the picture column, name aligned with the stats column (user).
+- 2026-11-08 [mr4.app] Monster render box bordered (not the row); emblem pair centred over the picture column, name aligned with the stats column (user).
 - 2026-11-08 [mr4.app] Mod column removed (user): modifier = 2 x (grade - 5) on all shown breeds.
 - 2026-11-08 [mr4.app] growthPct no longer includes trait grade lifts (user: traits are swappable, show the breed value).
 - 2026-11-08 [mr4.app] Monster rows: per stat Base / bar / Growth grade + gain % / Mod, plus Lifespan and growth type
