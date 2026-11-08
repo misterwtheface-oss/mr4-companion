@@ -14,7 +14,8 @@ Encyclopedia for **Monster Rancher 4** (PS2, Tecmo 2003): monsters, techniques, 
 (`../_mr4_extract`, never committed here). Monster images are our own Blender renders of the game's 3D models
 (MR4 has no 2D monster portraits). Each species has an `img` provenance tag (`render:<file>` or `none:<reason>`);
 `--strict` fails on missing renders, render/name mismatches, dangling ids, or image paths not on disk.
-Image resizing uses Lanczos (no AI upscalers).
+Image resizing uses Lanczos (no AI upscalers). The full image pass took ~20 min on 2026-11-08 (PC busy): run it
+through Task Scheduler; `--no-images` rebuilds data.js alone in seconds.
 
 Field notes: lifespan is in the game's life points (10-15 lost per week); stat grades are the raw species values;
 technique element and category are not shown because their player-facing names are not decoded yet.
