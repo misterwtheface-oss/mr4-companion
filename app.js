@@ -72,17 +72,16 @@
   const statMax = magMax(shownGroups.flatMap((k) => members[k]), STATS, (s, x) => s.base[x]);
   // stat colours = the Mon info stat labels (POW red, LIF orange, INT green, ACC = SKI magenta, DEF blue, SPD cyan)
   // per stat: base, growth grade 1..9 with its training-gain % (growthPct, breed grade only, traits left out; extract MONSTER_DATA.md
-  // § Growth), modifier -8..8 (swing of the gain roll); growth type = peak of the age curve (cmn_glow_number column)
+  // § Growth); the modifier is not shown (always 2 x (grade - 5) on shown breeds); growth type = peak of the age curve (cmn_glow_number column)
   const GROWTH_TYPE = ['Early', 'Early-mid', 'Normal', 'Mid-late', 'Late', 'Steady'];
   const signed = (n) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0');
   const monRow = (s) =>
     `<div class="mrow"><div class="mrow-h">${pair(s)}<b>${esc(s.name)}</b></div>` +
     `<div class="mrow-b"><div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
-    '<i></i><i class="h">Base</i><i></i><i class="h">Growth</i><i class="h">Mod</i>' +
+    '<i></i><i class="h">Base</i><i></i><i class="h">Growth</i>' +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>` +
-      `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>` +
-      `<span class="gm">${signed(s.growthMod[x])}</span>`).join('') +
+      `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
     `</div><div class="mmeta"><span><i>Lifespan</i> ${s.lifespan}</span><span><i>Growth</i> ${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div>` +
     '</div></div></div>';
 

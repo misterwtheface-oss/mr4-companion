@@ -56,7 +56,7 @@ Backlog (user, 2026-11-08):
       words per trait (extract 01_monster § 4.4, 03_battle).
 - [x] Technique panels drawn like the game's: layouts 20 / 21 rebuilt from their parts (State, 2026-11-08 game panels).
 - [x] Breed emblems inside the game's UI container: res 0x8B backdrop + Mon info name plate / breed row.
-- [x] Per-stat modifier shown (column Mod): swing of the training gain roll (extract MONSTER_DATA.md § Growth).
+- [x] Per-stat modifier: not shown (user 2026-11-08): always 2 x (grade - 5) on every shown breed, Growth says it all.
 - [ ] Per-monster extras (user decides what to show): traits, favourite items, likes / dislikes by food and item
       category (species.json food_cat / item_cat, not yet in data.js), like levels (battles, rest), personality odds
       (mix of main and sub breed tables). Personality names and food-category names still need decoding.
@@ -78,6 +78,7 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Mod column removed (user): modifier = 2 x (grade - 5) on all shown breeds.
 - 2026-11-08 [mr4.app] growthPct no longer includes trait grade lifts (user: traits are swappable, show the breed value).
 - 2026-11-08 [mr4.app] Monster rows: per stat Base / bar / Growth grade + gain % / Mod, plus Lifespan and growth type
   (user ask). growthPct built in tools/build_data.py from res 0x49 + 0x08 and trait effects 10-16. Open: nothing new.
