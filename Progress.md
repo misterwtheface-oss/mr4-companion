@@ -4,7 +4,8 @@
 - 2026-11-08: v1 scaffold (encyclopedia first, user's choice; repo name mr4-companion). Tabs Monsters / Techniques /
   Items / Tournaments; detail overlays cross-link monster, breed, technique, item, tournament. 335 monster renders
   (3/4 view); the 5 special monsters (King Shiden, Don Mudleone, Garp, Zevion x2) have no model set and show
-  "no render". Not yet on GitHub / Pages.
+  "no render". Live 2026-11-08: https://misterwtheface-oss.github.io/mr4-companion/ (Pages from main, auto-deploys on
+  push; Cloudflare beacon not added until public release).
 
 ## Open
 - [ ] Item pictures: MR4 items are 3D models (MO4_ITEM = model textures, not icons); render them like the monsters.
