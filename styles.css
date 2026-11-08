@@ -4,6 +4,8 @@
   --steel: #9aa7b2; --text: #e6ebef; --dim: #8d99a3;
   --bronze: #c9954a; --teal: #5fe0d0; --bad: #e0725f;
   --r: 10px;
+  /* game colours are kept exact (--g) and softened here: share of the game colour vs a muted steel grey */
+  --soft: 68%; --mute: #a9b3bb;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text);
@@ -66,8 +68,8 @@ main { padding: 12px 10px; }
 .bar { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--c, var(--teal)); }
 /* stat colours from the game's Monster Data labels (SKI = the game's ACC.) */
-.s-POW { --c: #e0704f; } .s-LIF { --c: #e8961a; } .s-INT { --c: #52bf43; }
-.s-SKI { --c: #e062c2; } .s-DEF { --c: #7484e6; } .s-SPD { --c: #5fd2d2; }
+.s-POW { --g: #e0704f; } .s-LIF { --g: #e8961a; } .s-INT { --g: #52bf43; }
+.s-SKI { --g: #e062c2; } .s-DEF { --g: #7484e6; } .s-SPD { --g: #5fd2d2; }
 .mstats > i[class^="s-"] { color: var(--c); font-weight: 700; }
 .mstats .g { min-width: 1ch; text-align: right; color: var(--steel); }
 /* growth grade 1..9: higher grows faster */
@@ -94,7 +96,8 @@ main { padding: 12px 10px; }
 .tc-n > b { font-size: 16px; }
 .tc-m { display: flex; gap: 10px; margin-top: 2px; font-size: 12px; font-weight: 700; }
 /* type / range text in the game's two-colour gradients */
-.tt { --c1: #fff; --c2: #fff; background: linear-gradient(var(--c1) 35%, var(--c2)); -webkit-background-clip: text;
+.tt { --c1: #fff; --c2: #fff; background: linear-gradient(color-mix(in oklab, var(--c1) var(--soft), var(--mute)) 35%,
+  color-mix(in oklab, var(--c2) var(--soft), var(--mute))); -webkit-background-clip: text;
   background-clip: text; color: transparent; }
 .t-pow { --c1: #f0d840; --c2: #40d450; } .t-int { --c1: #40d450; --c2: #78ec80; }
 .tc-i { display: inline-flex; gap: 4px; flex: none; }
@@ -106,10 +109,11 @@ main { padding: 12px 10px; }
   font-variant-numeric: tabular-nums; font-size: 13px; }
 .rates > i { font-style: normal; font-weight: 700; color: var(--c); white-space: nowrap; }
 .rates > b { text-align: right; font-weight: 600; }
-.rates > img { width: 26px; height: 26px; image-rendering: pixelated; }
+.rates > img { width: 26px; height: 26px; image-rendering: pixelated; filter: saturate(.7) brightness(.92); }
 .rates .bar { height: 8px; }
 /* the game's rate label colours (Life Damage red, Guts Damage cyan, Critical yellow, Accuracy magenta) */
-.r-life { --c: #e83a3a; } .r-guts { --c: #22b8a8; } .r-crit { --c: #d8cf3a; } .r-acc { --c: #d8459e; }
+.r-life { --g: #e83a3a; } .r-guts { --g: #22b8a8; } .r-crit { --g: #d8cf3a; } .r-acc { --g: #d8459e; }
+.s-POW, .s-LIF, .s-INT, .s-SKI, .s-DEF, .s-SPD, .r-life, .r-guts, .r-crit, .r-acc { --c: color-mix(in oklab, var(--g) var(--soft), var(--mute)); }
 .ico { width: 20px; height: 20px; vertical-align: middle; }
 .badge { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
 .iv { display: inline-flex; align-items: center; white-space: nowrap; }

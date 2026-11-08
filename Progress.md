@@ -28,6 +28,8 @@
   rates as rows in the game's label colours (Life Damage red, Guts Damage cyan, Critical yellow, Accuracy magenta) with
   a magnitude bar (share of that stat's largest value), the raw value and the game's E..S letter. Panel backgrounds
   are no longer shipped (the extract export keeps them).
+  Colours softened (user: game colours too bold): styles.css keeps the game value per class (--g) and mixes it with a
+  muted steel (--soft 68%, --mute) in one place; rank letters slightly desaturated.
 
 ## Open
 Backlog (user, 2026-11-08):
