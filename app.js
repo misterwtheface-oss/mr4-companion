@@ -44,10 +44,11 @@
   // ---- breed overlay ----
   const monRow = (s, k) => {
     const sub = s.sub === s.main ? 'Pure' : (BR[s.sub]?.name ?? '');
-    return `<div class="mrow"><div class="mrow-id">${monImg(s, true)}<div class="mrow-n"><b>${esc(s.name)}</b>` +
-      (k === SPECIAL ? '' : `<small>${esc(sub)}</small>`) + '</div></div><div class="mstats">' +
-      STATS.map((x) => `<div class="ms"><i>${x}</i><b>${s.base[x]}</b><span class="g g${s.grade[x]}">${s.grade[x]}</span></div>`).join('') +
-      '</div></div>';
+    return `<div class="mrow"><div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mrow-n"><b>${esc(s.name)}</b>` +
+      (k === SPECIAL ? '' : `<small>${esc(sub)}</small>`) + '</div><div class="mstats">' +
+      STATS.map((x) => `<i>${x}</i><b>${s.base[x]}</b><div class="bar"><i style="width:${Math.min(100, s.base[x] / 3)}%"></i></div>` +
+        `<span class="g g${s.grade[x]}">${s.grade[x]}</span>`).join('') +
+      '</div></div></div>';
   };
   const techRow = (t) =>
     `<div class="trow">${ico(t.icon, 'waza') || '<span class="waza"></span>'}<div class="trow-m"><div class="row-h"><b>${esc(t.name)}</b>` +
