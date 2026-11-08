@@ -14,7 +14,7 @@
   stays in data.js for later features).
 
 - 2026-11-08 (game panels): emblems and techniques are drawn the way the game draws them, from the game's own UI
-  layouts (extract APP.md § UI layouts / § Icon map). Main page = one Mon info name plate per breed (gold bar, emblem,
+  layouts (extract APP_UI.md § UI layouts / § Icon map). Main page = one Mon info name plate per breed (gold bar, emblem,
   name in the blue band). Monster rows start with the Mon info breed row (main emblem x sub emblem, name). Breed view =
   the Mon info technique page: "Skills" grid (slot n = tile n, tap to select, cursor arrow) + the detail box (type,
   range, name, guts, Added Effects, category / element sockets) + four rank boxes (E..S letters from the game's
@@ -65,8 +65,16 @@ Backlog (user, 2026-11-08):
 - [ ] Book routes: real album titles for discs; "From Book" stat generation (extract REQUESTS / 05_summon Q5).
 - [ ] Planner features (raising, combining) after the encyclopedia.
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
+- [ ] Ape renders (user to judge): faint red haze above the head (helmet light bound to its dimmest texanm frame; drop
+      it or pick another frame); the sub emblem on Ape rows is "?" (subs 0x23..0x25 are not breeds; could show the
+      Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Lit renders shipped (live 070ebe1). What changed and why: task MR4_rerender_lit rendered all
+  335, but its app build died on one transient WebP encode error (item 290, memory right after Blender), so nothing was
+  committed; re-ran MR4_app_build (0 errors), checked at phone width, pushed; fixed rerender_lit.cmd (lost its folder
+  after the app build call, so no done marker); extract APP.md split, icon map + UI layouts -> APP_UI.md (budget).
+  Open after this session: the two Ape render questions (Open list).
 - 2026-11-08 [mr4.app] User trim of the game panels (State, "user trim"): emblems, CSS x pair, pictograms, rate rows
   with game colours. What changed and why: the user wanted only chosen parts of the high-fidelity panels.
 - 2026-11-08 [mr4.app] Game panels: extract `tools/layouts.py` (LAYOUTS format decoded, panel export), `icon_map.py`

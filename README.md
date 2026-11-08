@@ -22,12 +22,12 @@ Encyclopedia for **Monster Rancher 4** (PS2, Tecmo 2003): monsters, techniques, 
 Image resizing uses Lanczos (no AI upscalers). The full image pass took ~20 min on 2026-11-08 (PC busy): run it
 through Task Scheduler; `--no-images` rebuilds data.js alone in seconds.
 
-Breed emblems are the game's own art (faces MF4_DB res 0x8A on the res 0x8B disc + ring, extract APP.md § Icon map),
+Breed emblems are the game's own art (faces MF4_DB res 0x8A on the res 0x8B disc + ring, extract APP_UI.md § Icon map),
 copied with the other icons on every build, `--no-images` included; each monster's main / sub emblem follows the game's
 face rule (Ape variants, special monsters, "?" subs). From the game's UI the app keeps the
 pieces the user picked: emblems, technique pictograms, the E..S rank letters (`meta.rankIcons`, extract `tools/layouts.py
 export`) and the game's colours (stat labels, rate labels, type / range text); the rest is CSS. Icons and item pictures come from the extract's code-backed icon map (`_mr4_extract/tools/icon_map.py`, extract
-APP.md § Icon map): technique pictograms (breed set + slot; the three Ape variants use their own set), element,
+APP_UI.md § Icon map): technique pictograms (breed set + slot; the three Ape variants use their own set), element,
 category and monster type icons, range names. Items are 3D models in the game, so item pictures are our renders
 (`_mr4_extract/tools/item_renders.py`, task MR4_item_renders); the 2 Envelopes and the "(NONE)" fillers have no model.
 Every shipped icon / picture path is checked on disk (`--strict`).
