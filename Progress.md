@@ -44,6 +44,10 @@
   Millielle, Balbalo, JackInTheCho, Spartacus; all on the extract's never-from-a-disc list, 05_summon § 1.5) are
   hidden by FEATURES.npcs (app.js); still in data.js.
 
+- 2026-11-08 (bars + flags): magnitude bars follow rule A-magnitude-bars (share of the largest shown value per field;
+  helper magMax / magBar); technique card adds a Guts Cost bar. Hidden by FEATURES: bosses, npcs (7 flat-100 monsters),
+  groupSkills (4 picture-less techniques per breed); all kept in data.js.
+
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.
