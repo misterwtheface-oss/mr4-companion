@@ -110,11 +110,11 @@ def main():
     categories = [{"id": c["id"], "icon": icon(c["icon"])} for c in im_map["categories"]]
     mon_types = [{"id": t["id"], "name": t["label"], "icon": icon(t["icon"])} for t in im_map["monster_types"]]
     # breed faces (res 0x8A, art-matched by id); "?" face 38 stands for the special monsters with no main breed
-    breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["emblem"])} for b in im_map["breeds"]]
+    breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["icon"])} for b in im_map["breeds"]]
     if [b["id"] for b in breeds] != [b["id"] for b in d["breeds"]]:
         errors.append("icon_map breeds do not cover every breed")
     face_rows = {b["tex"]: b for b in im_map["breeds"] + im_map["extra_faces"]}
-    special_icon = icon(face_rows[0x26]["emblem"])
+    special_icon = icon(face_rows[0x26]["icon"])
 
     def faces(main, sub):
         # FUN_00296a30 (extract APP.md § Icon map): face index of the main and sub slot of the Mon info breed row
@@ -124,7 +124,7 @@ def main():
         if 0x26 <= main < 0x30:                          # Mon_IsSpecialMain
             f_main = 0x21 + (main - 0x26) % 5
         f_sub = 0x26 if sub is None or 0x21 <= sub <= 0x25 or 0x26 <= sub < 0x30 else sub
-        return [icon(face_rows[f_main]["emblem"]), icon(face_rows[f_sub]["emblem"])]
+        return [icon(face_rows[f_main]["icon"]), icon(face_rows[f_sub]["icon"])]
     ranges = {int(k): v for k, v in im_map["texts"]["technique_range"].items()}
     tech_icon = {t["id"]: t for t in im_map["techniques"]}
 

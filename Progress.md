@@ -30,6 +30,8 @@
   are no longer shipped (the extract export keeps them).
   Colours softened (user: game colours too bold): styles.css keeps the game value per class (--g) and mixes it with a
   muted steel (--soft 68%, --mute) in one place; rank letters slightly desaturated.
+  Emblem container is CSS now (user: the game's ring art looked off at app sizes): blue radial disc + gold gradient
+  ring scaled from one --e diameter, bare face on top (styles.css .emb); the composed emblem PNGs stay in the extract.
 
 ## Open
 Backlog (user, 2026-11-08):

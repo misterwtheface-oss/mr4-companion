@@ -17,14 +17,21 @@ button { font: inherit; color: inherit; }
 .top h1 { margin: 0; font-size: 17px; letter-spacing: .04em; color: var(--bronze); }
 main { padding: 12px 10px; }
 
-/* breed emblem = the game's face on its blue disc + gold ring (48x48 art; whole-number sizes stay crisp) */
-.emb { width: 48px; height: 48px; image-rendering: pixelated; flex: none; }
-.emb.sm { width: 40px; height: 40px; image-rendering: auto; }
+/* breed emblem: CSS take on the game's container (res 0x8B blue disc + gold ring) with the bare face on top;
+   --e = diameter, ring = 7% of it, so it reads the same at every size */
+.emb { --e: 48px; position: relative; display: inline-grid; place-items: center; flex: none;
+  width: var(--e); height: var(--e); border-radius: 50%; box-sizing: border-box;
+  border: max(2px, calc(var(--e) * .07)) solid transparent;
+  background: radial-gradient(circle at 38% 30%, #5d8fe0, #2c5bb8 48%, #173a85 78%, #0f2a66) padding-box,
+              linear-gradient(150deg, #fbe6a0, #d9a838 30%, #a8761c 55%, #f0cf72 75%, #9a6a14) border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .45), inset 0 0 calc(var(--e) * .08) rgba(0, 0, 0, .35); }
+.emb img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.06); }
+.emb.sm { --e: 40px; }
 
 /* main page: one emblem per main breed */
 .emblems { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 14px 8px; }
 .emblem { min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; text-align: center; }
-.emblem .emb { width: 96px; height: 96px; max-width: 100%; }
+.emblem .emb { --e: 88px; }
 .emblem b { display: block; margin-top: 2px; font-size: 13px; font-weight: 600;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emblem:active .emb { filter: brightness(1.25); }
