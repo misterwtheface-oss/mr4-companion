@@ -16,3 +16,8 @@
 - [ ] Book routes: real album titles for discs; "From Book" stat generation (extract REQUESTS / 05_summon Q5).
 - [ ] Planner features (raising, combining) after the encyclopedia.
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
+
+## Session log
+- 2026-11-08 [mr4.app] What changed and why: v1 encyclopedia built and published (user: encyclopedia first, repo
+  mr4-companion); kit gained tools/app/shot.py for phone-width checks. Open after this session: item pictures,
+  technique icon lookup, element/category names (list above).
