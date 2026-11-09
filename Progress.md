@@ -78,6 +78,7 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] All bars relative (user): lowest shown value = 6 % sliver, highest = full, linear between (magMax -> {lo, hi}).
 - 2026-11-08 [mr4.app] Monster rows (user previews): one gold box per monster (2 px outer border), header band = emblems | name
   (gold .tt gradient), body = render | stats; Base / Growth labels dropped; lifespan = magnitude bar with the growth type.
 - 2026-11-08 [mr4.app] Monster rows: emblems + render in one two-part box (emblem header, gold borders), name heads the stats column (user).

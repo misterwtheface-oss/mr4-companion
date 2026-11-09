@@ -64,10 +64,18 @@
   }
 
   // ---- breed overlay ----
-  // magnitude bars (rule A-magnitude-bars): each value as a share of the largest value of that same field among the
-  // entries the app shows (hidden NPCs / bosses excluded), so one entry alone reads as its standing on that field
-  const magMax = (items, keys, get) => Object.fromEntries(keys.map((k) => [k, Math.max(...items.map((it) => get(it, k)))]));
-  const magBar = (v, max, cls) => `<div class="bar ${cls}"><i style="width:${Math.round(v / max * 100)}%"></i></div>`;
+  // magnitude bars (rule A-magnitude-bars, relative form: user 2026-11-08): each value placed between the lowest and the
+  // highest value of that same field among the entries the app shows (hidden NPCs / bosses excluded); the lowest keeps
+  // a sliver (BAR_FLOOR %) so it reads as "lowest", not empty; the highest is full
+  const BAR_FLOOR = 6;
+  const magMax = (items, keys, get) => Object.fromEntries(keys.map((k) => {
+    const v = items.map((it) => get(it, k));
+    return [k, { lo: Math.min(...v), hi: Math.max(...v) }];
+  }));
+  const magBar = (v, r, cls) => {
+    const w = r.hi > r.lo ? BAR_FLOOR + (100 - BAR_FLOOR) * (v - r.lo) / (r.hi - r.lo) : 100;
+    return `<div class="bar ${cls}"><i style="width:${Math.round(w)}%"></i></div>`;
+  };
   const shownGroups = Object.keys(members).filter((k) => k !== SPECIAL || FEATURES.bosses);
   const statMax = magMax(shownGroups.flatMap((k) => members[k]), [...STATS, 'lifespan'], (s, x) => (x === 'lifespan' ? s.lifespan : s.base[x]));
   // stat colours = the Mon info stat labels (POW red, LIF orange, INT green, ACC = SKI magenta, DEF blue, SPD cyan)
