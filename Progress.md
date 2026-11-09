@@ -52,6 +52,11 @@
   per element / category over the shown monsters); both panels share one cell so the box keeps its height. Data =
   species vars 0x4A-0x54 (extract 01_monster), shipped as species.resist {el[8] by element id 1..8, cat[3]};
   build_data.py errors if the element / category order changes.
+- 2026-11-09: stat order leads with Life (LIF, POW, INT, SKI, SPD, DEF; STATS in build_data.py, user). Raising-advisor
+  groundwork done on the extract side (not in the app yet): rules in _mr4_extract/RAISING_ADVICE.md (praise / scold by
+  the training panel's "Success Rate N %" vs the personality group 40/50, 50/60, 60/70; fair week = praise by default;
+  rest when the Status word reads Tired; lifespan / health charged on end-of-week values; fatigue gain ranges per drill),
+  60 in-game condition screenshots (_mr4_extract/assets/advisor/), data files listed in _mr4_extract/APP.md § Data.
 
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
