@@ -78,6 +78,9 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] 35 renders re-done with their feet (user: Pixies missing feet): the lit renders' shadow-catcher ground sat at the
+  trimmed lowest point, hiding toes / bases (Pixies, Ryoku, Jells, Ducks, Gitans, Fish); fix in tools/render/blender_batch.py, task
+  MR4_rerender_feet (extract tools/feet_rerender.py, old renders kept in assets/renders/mr4_feet_old/).
 - 2026-11-08 [mr4.app] Monster renders centred vertically in their box (were bottom-aligned; user).
 - 2026-11-08 [mr4.app] All bars relative (user): lowest shown value = 6 % sliver, highest = full, linear between (magMax -> {lo, hi}).
 - 2026-11-08 [mr4.app] Monster rows (user previews): one gold box per monster (2 px outer border), header band = emblems | name
