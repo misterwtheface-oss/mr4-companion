@@ -78,6 +78,8 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-08 [mr4.app] Monster rows (user previews): one gold box per monster (2 px outer border), header band = emblems | name
+  (gold .tt gradient), body = render | stats; Base / Growth labels dropped; lifespan = magnitude bar with the growth type.
 - 2026-11-08 [mr4.app] Monster rows: emblems + render in one two-part box (emblem header, gold borders), name heads the stats column (user).
 - 2026-11-08 [mr4.app] Monster render box bordered (not the row); emblem pair centred over the picture column, name aligned with the stats column (user).
 - 2026-11-08 [mr4.app] Mod column removed (user): modifier = 2 x (grade - 5) on all shown breeds.

@@ -53,14 +53,18 @@ main { padding: 12px 10px; }
 .seg button.on { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
 .sheet-body { flex: 1; overflow-y: auto; padding: 0 12px 24px; border-top: 1px solid var(--line); }
 
-/* monster rows: picture at full row height, then per stat: label, base, magnitude bar, growth grade, gain % */
-.mlist { display: flex; flex-direction: column; }
-.mrow { display: flex; gap: 10px; align-items: stretch; padding: 8px 0; border-bottom: 1px solid var(--line); }
-/* one two-part box: main x sub emblems as its header, the render below; the name heads the stats column */
-.mcard { flex: none; width: 124px; display: flex; flex-direction: column; overflow: hidden;
-  border: 1px solid var(--gold); border-radius: var(--r); }
-.mcard-h { display: flex; justify-content: center; padding: 4px 0; background: var(--panel2); border-bottom: 1px solid var(--gold); }
-.mname { display: block; font-size: 15px; margin: 6px 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* monster rows: one gold box = header band (emblems | name) over the body (render | stats); per stat: label, base,
+   magnitude bar, growth grade, gain %; then lifespan as a bar with the growth type */
+.mlist { display: flex; flex-direction: column; gap: 8px; }
+.mrow { display: grid; grid-template-columns: 124px 1fr; grid-template-rows: auto 1fr; overflow: hidden;
+  border: 2px solid var(--gold); border-radius: var(--r); }
+.mrow-hl, .mrow-hr { background: var(--panel2); border-bottom: 1px solid var(--gold); padding: 4px 0; }
+.mrow-hl { display: flex; justify-content: center; border-right: 1px solid var(--gold); }
+.mrow-hr { display: flex; align-items: center; padding: 0 10px; min-width: 0; }
+/* name in the game's two-colour text gradient (.tt), gold, with a dark drop shadow */
+.tt.mname { --c1: #fff1c4; --c2: #c9963c; --soft: 100%; font-size: 17px; font-weight: 800; letter-spacing: .05em; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; filter: drop-shadow(0 1px 0 #1b1508) drop-shadow(0 0 2px #000a); }
+.mrow-pic { border-right: 1px solid var(--gold); }
 /* main x sub: a gold "x" between the emblems, after the game's breed-row mark */
 .pair { display: inline-flex; align-items: center; gap: 2px; flex: none; }
 .x { position: relative; width: 16px; height: 16px; }
@@ -68,12 +72,12 @@ main { padding: 12px 10px; }
   background: linear-gradient(#e9d7a2, #c19a4e 55%, #7d5e26); box-shadow: 0 0 0 1px #2a1f0c;
   transform: translate(-50%, -50%) rotate(45deg); }
 .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
-.mrow-pic { flex: 1; position: relative; overflow: hidden;   /* stats set the row height */
+.mrow-pic { position: relative; overflow: hidden;   /* stats set the row height */
   /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
 .mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px);
   object-fit: contain; object-position: 50% 100%; }   /* lit renders carry their own cast + ground shadow */
-.mrow-m { flex: 1; min-width: 0; }
+.mrow-m { min-width: 0; padding: 7px 10px 8px; }
 .mstats { display: grid; grid-template-columns: auto auto 1fr auto auto; gap: 2px 6px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }
 .mstats > i { font-style: normal; font-size: 11px; color: var(--dim); letter-spacing: .04em; }
@@ -88,12 +92,14 @@ main { padding: 12px 10px; }
 /* growth grade 1..9: higher grows faster */
 .g.g7, .g.g8, .g.g9 { color: var(--gold-hi); font-weight: 700; }
 .g.g1, .g.g2, .g.g3 { color: var(--bad); }
-.mstats > .h { font-size: 10px; text-align: right; }
-.mstats > .h:nth-child(4) { grid-column: span 2; text-align: center; }
 .mstats .gp { min-width: 4.2ch; text-align: right; font-size: 12px; color: var(--dim); }
 .mstats .gp.up { color: var(--gold-hi); } .mstats .gp.dn { color: var(--bad); }
-.mmeta { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 5px; font-size: 12px; }
-.mmeta i { font-style: normal; font-size: 11px; color: var(--dim); margin-right: 3px; }
+.mlife { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line);
+  font-size: 13px; font-variant-numeric: tabular-nums; }
+.mlife > i { font-style: normal; font-size: 11px; color: var(--dim); }
+.mlife > b { font-weight: 600; }
+.mlife > .bar { flex: 1; --c: var(--gold); }
+.mlife > span { font-size: 12px; color: var(--steel); }
 
 /* breed view */
 .sec { margin-top: 12px; }

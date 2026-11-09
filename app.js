@@ -69,21 +69,21 @@
   const magMax = (items, keys, get) => Object.fromEntries(keys.map((k) => [k, Math.max(...items.map((it) => get(it, k)))]));
   const magBar = (v, max, cls) => `<div class="bar ${cls}"><i style="width:${Math.round(v / max * 100)}%"></i></div>`;
   const shownGroups = Object.keys(members).filter((k) => k !== SPECIAL || FEATURES.bosses);
-  const statMax = magMax(shownGroups.flatMap((k) => members[k]), STATS, (s, x) => s.base[x]);
+  const statMax = magMax(shownGroups.flatMap((k) => members[k]), [...STATS, 'lifespan'], (s, x) => (x === 'lifespan' ? s.lifespan : s.base[x]));
   // stat colours = the Mon info stat labels (POW red, LIF orange, INT green, ACC = SKI magenta, DEF blue, SPD cyan)
   // per stat: base, growth grade 1..9 with its training-gain % (growthPct, breed grade only, traits left out; extract MONSTER_DATA.md
   // § Growth); the modifier is not shown (always 2 x (grade - 5) on shown breeds); growth type = peak of the age curve (cmn_glow_number column)
   const GROWTH_TYPE = ['Early', 'Early-mid', 'Normal', 'Mid-late', 'Late', 'Steady'];
   const signed = (n) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0');
   const monRow = (s) =>
-    `<div class="mrow"><div class="mcard"><div class="mcard-h">${pair(s)}</div><div class="mrow-pic">${monImg(s)}</div></div>` +
-    `<div class="mrow-m"><b class="mname">${esc(s.name)}</b><div class="mstats">` +
-    '<i></i><i class="h">Base</i><i></i><i class="h">Growth</i>' +
+    // one box: header band (emblems | name) over the body (render | stats + lifespan bar with the growth type)
+    `<div class="mrow"><div class="mrow-hl">${pair(s)}</div><b class="mrow-hr"><span class="tt mname">${esc(s.name)}</span></b>` +
+    `<div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>` +
       `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
-    `</div><div class="mmeta"><span><i>Lifespan</i> ${s.lifespan}</span><span><i>Growth</i> ${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div>` +
-    '</div></div>';
+    `<div class="mlife"><i>Lifespan</i><b>${s.lifespan}</b>${magBar(s.lifespan, statMax.lifespan, 'life')}` +
+    `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div></div></div>`;
 
   // techniques: pictogram grid by slot (as the game's Skills page), detail card for the selected one
   const RANGE_C = ['#f47468', '#f47468', '#f4dc64', '#f4dc64', '#78ec80', '#78ec80', '#78ec80', '#78ec80', '#78ec80'];
