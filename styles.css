@@ -76,7 +76,7 @@ main { padding: 12px 10px; }
   /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
 .mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px);
-  object-fit: contain; object-position: 50% 100%; }   /* lit renders carry their own cast + ground shadow */
+  object-fit: contain; object-position: 50% 50%; }   /* centred; lit renders carry their own cast + ground shadow */
 .mrow-m { min-width: 0; padding: 7px 10px 8px; }
 .mstats { display: grid; grid-template-columns: auto auto 1fr auto auto; gap: 2px 6px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }
