@@ -64,7 +64,15 @@ Backlog (user, 2026-11-08):
 - [x] Per-stat modifier: not shown (user 2026-11-08): always 2 x (grade - 5) on every shown breed, Growth says it all.
 - [ ] Per-monster extras (user decides what to show): traits, favourite items, likes / dislikes by food and item
       category (species.json food_cat / item_cat, not yet in data.js), like levels (battles, rest), personality odds
-      (mix of main and sub breed tables). Personality names and food-category names still need decoding.
+      (mix of main and sub breed tables).
+      User 2026-11-09: wants ALL food data + likes / dislikes, Book descriptions, trait learning. Extract side DONE
+      2026-11-09, not yet in data.js / the app: Book descriptions (data/monster/book_desc.json, 335; specials have none;
+      tools/dec_book.py), Library topics (6 breed topics in breed_lore.json, all 40 in data/core/library_topics.json),
+      trait learning (data/monster/trait_learning.json: expedition levels only; fixed Ride/Search trait per main breed
+      at a set level, else weighted random pools by level band; 01_monster.md § 4.8), food + likes + personality
+      names / odds (data/monster/food.json, likes.json; tools/dec_advisor.py). All code-cited, nothing checked in play.
+- [ ] Raising advisor module (user 2026-11-09): per monster, what to feed and when, when to rest, when to praise vs
+      scold, etc. Rules spec ready: _mr4_extract/RAISING_ADVICE.md (gaps listed there). UI not started.
 - [x] Breed face draw site traced (`FUN_00296a30`); faces code-backed.
 - [x] In-game check of the technique page (route `_mr4_extract/tools/route_data_pages.txt`, page 2 Customizing): grid,
       opaque pictograms, detail box and rank boxes match. Not yet seen in a frame: a selected technique (name / rank

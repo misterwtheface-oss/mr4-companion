@@ -33,7 +33,7 @@ UI_PANELS = os.path.join(X, "data", "assets", "ui_panels.json")
 MON = os.path.join(APP, "assets", "mon")
 ITEM = os.path.join(APP, "assets", "item")
 ITEM_DETAIL, ITEM_THUMB = 256, 64
-STATS = ["POW", "INT", "SKI", "SPD", "DEF", "LIF"]
+STATS = ["LIF", "POW", "INT", "SKI", "SPD", "DEF"]  # Life first (user 2026-11-09)
 DETAIL, THUMB = 384, 96
 
 errors, warnings = [], []
