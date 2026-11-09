@@ -91,11 +91,26 @@ Backlog (user, 2026-11-08):
 - [ ] Book routes: real album titles for discs; "From Book" stat generation (extract REQUESTS / 05_summon Q5).
 - [ ] Planner features (raising, combining) after the encyclopedia.
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
+- [ ] Monster render shadows (user 2026-11-09, picked look "D"; parked while the user tests performance, run it when
+      the PC is free): no shadow toward the viewer. Look D = jobs_lit settings `"rim_shadow": false, "fill": "suns"`
+      (rim light casts no forward shadow; grey world fill replaced by 6 shadowless suns, so no dark halo round the
+      feet; key light unchanged, its shadow falls back and to the side). Options live in
+      tools/render/blender_batch.py; samples + sheet in _mr4_extract/scratch/noshadow/ (D/, shadow_E.png row D).
+      To do: (1) add both keys in `_mr4_extract/tools/xgame_renders.py jobs_lit`; (2) re-render all 335 via Task
+      Scheduler (task MR4_rerender_lit, ~1 h incl. app image pass); (3) app crop `build_data.crop_model`: it counts
+      only alpha >= 250 as the monster, so see-through Jells lose head + hand (333 Jell) and shadows get cut at the
+      square's edge; crop to the full visible outline (model + kept shadow) instead; (4) phone screenshot to the user
+      before pushing. Optional, user to choose: wider picture slot in the monster rows (the tall narrow slot leaves
+      wide monsters small).
 - [ ] Ape renders (user to judge): faint red haze above the head (helmet light bound to its dimmest texanm frame; drop
       it or pick another frame); the sub emblem on Ape rows is "?" (subs 0x23..0x25 are not breeds; could show the
       Ape's own face).
 
 ## Session log
+- 2026-11-09 [mr4.app] changed 292 files (CONTEXT_MAP.md, PLAYTEST.md, PORT_LOG_2026-11.md, RAISING_ADVICE.md…). What changed
+  and why: user disliked the shadow falling toward the viewer in the monster renders; traced it to the rim light and the
+  grey world fill (halo round the feet), added render options and sample looks A-E; user picked D. Open after this
+  session: D re-render + app crop fix parked in § Open (user is testing performance).
 - 2026-11-08 [mr4.app] 35 renders re-done with their feet (user: Pixies missing feet): the lit renders' shadow-catcher ground sat at the
   trimmed lowest point, hiding toes / bases (Pixies, Ryoku, Jells, Ducks, Gitans, Fish); fix in tools/render/blender_batch.py, task
   MR4_rerender_feet (extract tools/feet_rerender.py, old renders kept in assets/renders/mr4_feet_old/).
