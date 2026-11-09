@@ -109,6 +109,11 @@ def main():
     sp_raw = json.load(open(os.path.join(X, "data", "monster", "species.json"), encoding="utf-8"))
     sp_rows = sp_raw if isinstance(sp_raw, list) else sp_raw["records"]
     sp_type = {r["index"]: r["var_A9"] for r in sp_rows}
+    # battle resists (extract 01_monster var 0x4A-0x54, 03_battle +0x994 / +0x998): element affinity by element id 1..8
+    # (Fire, Ice, Thunder, Water, Wind, Earth, Heart, Magic) = vars 0x52, 0x51, 0x50, 0x4E, 0x4F, 0x4D, 0x53, 0x54;
+    # category 1..3 resist = vars 0x4A, 0x4B, 0x4C
+    sp_resist = {r["index"]: {"el": [r[f"var_{v}"] for v in ("52", "51", "50", "4E", "4F", "4D", "53", "54")],
+                              "cat": [r[f"var_{v}"] for v in ("4A", "4B", "4C")]} for r in sp_rows}
     # special mains 0x26..0x2F have no breed id in data.js; their record's name provenance names it
     sp_special = {r["index"]: int(m.group(1), 16) for r in sp_rows
                   if (m := re.search(r"special main (0x[0-9A-Fa-f]+)", r.get("name_src") or ""))}
@@ -128,6 +133,8 @@ def main():
 
     elements = [{"id": e["id"], "name": e["name"], "icon": icon(e["icon"])} for e in im_map["elements"]]
     categories = [{"id": c["id"], "icon": icon(c["icon"])} for c in im_map["categories"]]
+    if [e["name"] for e in elements[1:]] != ["Fire", "Ice", "Thunder", "Water", "Wind", "Earth", "Heart", "Magic"]             or [c["id"] for c in categories[1:]] != [1, 2, 3]:
+        errors.append("element / category ids no longer match the species resist order (sp_resist)")
     mon_types = [{"id": t["id"], "name": t["label"], "icon": icon(t["icon"])} for t in im_map["monster_types"]]
     # breed faces (res 0x8A, art-matched by id); "?" face 38 stands for the special monsters with no main breed
     breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["icon"])} for b in im_map["breeds"]]
@@ -205,7 +212,7 @@ def main():
         b = book.get(sid)
         species.append({k: s[k] for k in ("id", "name", "main", "sub", "base", "grade", "growthMod", "growthType",
                                           "lifespan", "traits", "favItems", "startTechs")} |
-                       {"img": img, "type": sp_type.get(sid), "growthPct": growth_pct(s), "book": b["routes"] if b else None,
+                       {"img": img, "type": sp_type.get(sid), "resist": sp_resist.get(sid), "growthPct": growth_pct(s), "book": b["routes"] if b else None,
                         "pic": [ver(f"assets/mon/{sid}.webp"), ver(f"assets/mon/s/{sid}.webp")] if img.startswith("render:") else None,
                         "faces": faces(s["main"] if s["main"] is not None else sp_special.get(sid, 0x26), s["sub"]),
                         "disc": b["discObtainable"] if b else None})

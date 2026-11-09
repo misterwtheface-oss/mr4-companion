@@ -83,15 +83,24 @@
   // § Growth); the modifier is not shown (always 2 x (grade - 5) on shown breeds); growth type = peak of the age curve (cmn_glow_number column)
   const GROWTH_TYPE = ['Early', 'Early-mid', 'Normal', 'Mid-late', 'Late', 'Steady'];
   const signed = (n) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0');
+  // battle resists: 8 element affinities + 3 category resists, -10..10 (extract MONSTER_DATA.md § Elements); one bar
+  // scale per element / category over the shown monsters
+  const resMax = magMax(shownGroups.flatMap((k) => members[k]), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'c0', 'c1', 'c2'],
+    (s, x) => s.resist[x[0] === 'e' ? 'el' : 'cat'][+x[1]]);
+  const resCell = (src, title, v, key, cls) => `${ico(src, 'ico', title)}<b>${signed(v)}</b>${magBar(v, resMax[key], cls)}`;
+  const resists = (s) => `<div class="mres"><div class="rgrid">` +
+    s.resist.el.map((v, i) => resCell(ELEM[i + 1].icon, ELEM[i + 1].name, v, 'e' + i, `el-${i + 1}`)).join('') +
+    `</div><div class="rgrid rcat">${s.resist.cat.map((v, i) => resCell(CAT[i + 1].icon, '', v, 'c' + i, 'cat')).join('')}</div></div>`;
   const monRow = (s) =>
-    // one box: header band (emblems | name) over the body (render | stats + lifespan bar with the growth type)
-    `<div class="mrow"><div class="mrow-hl">${pair(s)}</div><b class="mrow-hr"><span class="tt mname">${esc(s.name)}</span></b>` +
+    // one box: header band (emblems | name) over the body (render | stats + lifespan bar with the growth type; a tap on
+    // the box swaps the stats for the resists)
+    `<div class="mrow${open.res.has(s.id) ? ' res' : ''}" data-mon="${s.id}"><div class="mrow-hl">${pair(s)}</div><b class="mrow-hr"><span class="tt mname">${esc(s.name)}</span></b>` +
     `<div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>` +
       `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
     `<div class="mlife"><i>Lifespan</i><b>${s.lifespan}</b>${magBar(s.lifespan, statMax.lifespan, 'life')}` +
-    `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div></div></div>`;
+    `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div>${resists(s)}</div></div>`;
 
   // techniques: pictogram grid by slot (as the game's Skills page), detail card for the selected one
   const RANGE_C = ['#f47468', '#f47468', '#f4dc64', '#f4dc64', '#78ec80', '#78ec80', '#78ec80', '#78ec80', '#78ec80'];
@@ -131,7 +140,7 @@
     },
   };
 
-  const open = { breed: null, scroll: {}, tech: {} };
+  const open = { breed: null, scroll: {}, tech: {}, res: new Set() };
   // select a technique in place (no re-render of the sheet: keeps the scroll position)
   function pickTech(id) {
     const page = $('.waza-page');
@@ -178,6 +187,12 @@
     if (b) { pushed = true; location.hash = 'b/' + b.dataset.breed; return; }
     const tb = e.target.closest('[data-tech]');
     if (tb) { pickTech(+tb.dataset.tech); return; }
+    const mr = e.target.closest('[data-mon]');
+    if (mr) {   // stats <-> resists in place (no re-render: keeps the scroll position)
+      const id = +mr.dataset.mon;
+      open.res.delete(id) || open.res.add(id);
+      mr.classList.toggle('res', open.res.has(id)); return;
+    }
     const v = e.target.closest('[data-view]');
     if (v) {
       open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;

@@ -47,6 +47,11 @@
 - 2026-11-08 (bars + flags): magnitude bars follow rule A-magnitude-bars (share of the largest shown value per field;
   helper magMax / magBar); technique card adds a Guts Cost bar. Hidden by FEATURES: bosses, npcs (7 flat-100 monsters),
   groupSkills (4 picture-less techniques per breed); all kept in data.js.
+- 2026-11-08 (resists + facing): monster renders mirrored in CSS (face right). Tapping a monster box swaps its stats
+  panel for its battle resists (8 element affinities in two columns + the 3 category resists, -10..10, magnitude bar
+  per element / category over the shown monsters); both panels share one cell so the box keeps its height. Data =
+  species vars 0x4A-0x54 (extract 01_monster), shipped as species.resist {el[8] by element id 1..8, cat[3]};
+  build_data.py errors if the element / category order changes.
 
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide

@@ -76,7 +76,8 @@ main { padding: 12px 10px; }
   /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
 .mrow-pic img, .mrow-pic .noimg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px);
-  object-fit: contain; object-position: 50% 50%; }   /* centred; lit renders carry their own cast + ground shadow */
+  object-fit: contain; object-position: 50% 50%;   /* centred; lit renders carry their own cast + ground shadow */
+  transform: scaleX(-1); }   /* mirrored: monsters face right (user 2026-11-08) */
 .mrow-m { min-width: 0; padding: 7px 10px 8px; }
 .mstats { display: grid; grid-template-columns: auto auto 1fr auto auto; gap: 2px 6px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }
@@ -100,6 +101,23 @@ main { padding: 12px 10px; }
 .mlife > b { font-weight: 600; }
 .mlife > .bar { flex: 1; --c: var(--gold); }
 .mlife > span { font-size: 12px; color: var(--steel); }
+/* tap a monster box: stats <-> resists (8 element affinities in two columns, then the 3 category resists) */
+.mrow { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mrow:active .mrow-m { background: rgba(200, 165, 90, .05); }
+/* both panels share one grid cell, the hidden one keeps its space: the box keeps its height on every tap */
+.mrow-m { display: grid; }
+.mrow-m > * { grid-area: 1 / 1; }
+.mres, .mrow.res .mstats { visibility: hidden; }
+.mrow.res .mres { visibility: visible; }
+.rgrid { display: grid; grid-template-columns: auto 3ch 1fr auto 3ch 1fr; gap: 3px 6px; align-items: center;
+  font-variant-numeric: tabular-nums; font-size: 13px; }
+.rgrid > b { font-weight: 600; text-align: right; }
+.rgrid .ico { width: 18px; height: 18px; }
+.rcat { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+/* element bar colours (after the game's element icons), softened like the stat colours */
+.el-1 { --g: #e8603c; } .el-2 { --g: #8fd3f0; } .el-3 { --g: #e8d040; } .el-4 { --g: #4a8ee8; }
+.el-5 { --g: #4fcfb8; } .el-6 { --g: #6ccf6a; } .el-7 { --g: #e87aa8; } .el-8 { --g: #a070e0; } .cat { --g: #c8a55a; }
+.rgrid .bar { --c: color-mix(in oklab, var(--g) var(--soft), var(--mute)); }
 
 /* breed view */
 .sec { margin-top: 12px; }
