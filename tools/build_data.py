@@ -54,24 +54,17 @@ def load_js(path):
     return json.loads(s[s.index("{"):s.rindex("}") + 1])
 
 
-def crop_model(im, pad=6, haze=30):
+def crop_model(im, pad=6, haze=30, floor=8):
     """Lit renders (Cycles shadow catcher): shadow pixels are black with partial alpha and a faint haze covers the whole
-    frame. Drop the haze (alpha below `haze` on shadow pixels, the rest rescaled), then square-crop to the model only
-    (alpha >= 250): the frame follows the monster, whatever shadow falls inside stays (user 2026-11-08)."""
+    frame. Drop the haze (alpha below `haze` on shadow pixels, the rest rescaled), then square-crop to the full visible
+    outline (alpha >= `floor`: see-through parts such as Jell bodies and the kept shadow stay inside the frame;
+    was alpha >= 250 = opaque model only, which cut both, user 2026-11-09)."""
     import numpy as np
     a = np.asarray(im).copy()
     sh = (a[..., :3].max(-1) < 8) & (a[..., 3] < 255)
     a[..., 3] = np.where(sh, np.clip((a[..., 3].astype(int) - haze) * 255 // (255 - haze), 0, 255), a[..., 3])
-    im = Image.fromarray(a, "RGBA")
-    box = Image.fromarray(((a[..., 3] >= 250) * 255).astype("uint8")).getbbox()
-    if not box:
-        return crop_alpha(im, pad)
-    l, t, r, b = box
-    side = max(r - l, b - t) + 2 * pad
-    cx, cy = (l + r) // 2, (t + b) // 2
-    out = Image.new("RGBA", (side, side), (0, 0, 0, 0))
-    out.alpha_composite(im.crop((cx - side // 2, cy - side // 2, cx - side // 2 + side, cy - side // 2 + side)))
-    return out
+    a[..., 3] = np.where(a[..., 3] < floor, 0, a[..., 3])   # stray near-clear pixels would widen the frame
+    return crop_alpha(Image.fromarray(a, "RGBA"), pad)
 
 
 def crop_alpha(im, pad=6):
@@ -268,15 +261,27 @@ def main():
         if t["prizeItem"] is not None and t["prizeItem"] not in item_ids:
             errors.append(f"tournament {t['id']}: prize item {t['prizeItem']} not found")
 
+    def evo_waza(t):   # Maya / Piroro pictogram = Evo's own (extract _mrevo tools/evo_waza.py; Evo main row, slot)
+        name = evo_mains[t["genus"]]["name"]
+        src = os.path.join(EVO_ICONS, "waza", "%02d_%02d.png" % (EVO_EMBLEM[name], t["slot"]))
+        if not os.path.exists(src):
+            errors.append(f"evo technique {t['id']} {t['name']}: {src} missing (run _mrevo_extract/tools/evo_waza.py)")
+            return None
+        dst = f"assets/icon/evo/waza/{name.lower()}_{t['slot']:02d}.png"
+        os.makedirs(os.path.join(APP, "assets", "icon", "evo", "waza"), exist_ok=True)
+        Image.open(src).save(os.path.join(APP, dst), optimize=True)
+        shipped.append(dst)
+        return ver(dst)
+
     techniques = []
     for t in d["techniques"]:
-        if t.get("origin") == "evo":   # Maya / Piroro: proposed MR4 numbers, no MR4 pictogram (icon none)
+        if t.get("origin") == "evo":   # Maya / Piroro: proposed MR4 numbers, Evo's own pictogram
             techniques.append({k: t[k] for k in ("id", "genus", "slot", "name", "type", "guts", "hit", "sharpness",
                                                   "damage", "withering", "heal", "followup", "element", "category")} |
                               {"range": t["range"] if t["range"] in ranges else None,
                                "effect": msg_db.get(0xAF + t["effect"]) if 0 <= t["effect"] < 0x22 else None,
                                "rank": {c: waza_rank(c, t[c]) for c in wr["cols"]}, "nameApe": None,
-                               "icon": None, "iconApe": None, "origin": "evo"})
+                               "icon": evo_waza(t), "iconApe": None, "origin": "evo"})
             continue
         r = sk.get((t["genus"], t["slot"]))
         ti = tech_icon.get(t["id"])

@@ -68,6 +68,10 @@
   techniques without pictograms). Numbers = extract tools/evo_records.py proposals (src per monster); grades that are a
   stat->grade proposal have a dashed outline (decision open: copy a base's growth spread or set a custom one per new
   base). Monster box tap now cycles stats -> resists -> info (Book description, starting trait, starting techniques).
+- 2026-11-10 (Evo technique art): Maya / Piroro techniques show Evo's own pictograms (extract _mrevo tools/evo_waza.py:
+  each Evo breed's model file carries its 12 slot pictograms, MR4 art format; build_data evo_waza -> assets/icon/evo/waza/).
+  Renders: look D + the 93 Evo imports re-rendered lit (task MR4_rerender_lit); app crop now keeps see-through parts and
+  the shadow (crop_model = full visible outline).
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.
