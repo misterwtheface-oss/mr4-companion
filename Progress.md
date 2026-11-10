@@ -112,6 +112,10 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-10 [mr4.app] What changed and why: user asked for the technique section in the monster-box style; the Breed tab
+  became Techniques, the pictogram selector went away for one gold box per technique (shared .box styles with monster rows),
+  Added Effects moved into the left column, the monster type moved into each monster's name band, and the overlay body got
+  top padding. Open after this session: nothing new.
 - 2026-11-09 [mr4.app] changed 292 files (CONTEXT_MAP.md, PLAYTEST.md, PORT_LOG_2026-11.md, RAISING_ADVICE.md…). What changed
   and why: user disliked the shadow falling toward the viewer in the monster renders; traced it to the rim light and the
   grey world fill (halo round the feet), added render options and sample looks A-E; user picked D. Open after this
