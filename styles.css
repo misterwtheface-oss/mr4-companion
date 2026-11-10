@@ -75,6 +75,9 @@ main { padding: 12px 10px; }
   background: linear-gradient(#e9d7a2, #c19a4e 55%, #7d5e26); box-shadow: 0 0 0 1px #2a1f0c;
   transform: translate(-50%, -50%) rotate(45deg); }
 .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
+/* monster type at the right end of the name band */
+.mrow .box-hr .iv { margin-left: auto; padding-left: 8px; font-size: 12px; font-weight: 600; color: var(--steel); }
+.mrow .box-hr .badge { width: 20px; height: 20px; margin-right: 4px; }
 .mrow-pic { position: relative; overflow: hidden;   /* stats set the row height */
   /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
@@ -122,8 +125,7 @@ main { padding: 12px 10px; }
 .el-5 { --g: #4fcfb8; } .el-6 { --g: #6ccf6a; } .el-7 { --g: #e87aa8; } .el-8 { --g: #a070e0; } .cat { --g: #c8a55a; }
 .rgrid .bar { --c: color-mix(in oklab, var(--g) var(--soft), var(--mute)); }
 
-/* techniques view: the breed's monster type, then one box per technique (list = .mlist) */
-.ttype { margin: 12px 0 8px; font-size: 14px; font-weight: 600; }
+/* techniques view: one box per technique (list = .mlist) */
 .waza { width: 100%; height: auto; aspect-ratio: 3 / 2; image-rendering: pixelated; display: block; }
 .tcard .box-hl { padding: 6px 0; }
 .tcard .box-hl .waza { width: 72px; }
@@ -138,8 +140,9 @@ main { padding: 12px 10px; }
 .t-pow { --c1: #f0d840; --c2: #40d450; } .t-int { --c1: #40d450; --c2: #78ec80; }
 .tc-i { display: inline-flex; gap: 4px; flex: none; }
 .tc-i .ico { width: 28px; height: 28px; }
-.tc-s { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); font-size: 13px; color: var(--dim); }
-.tc-s b { color: var(--text); font-weight: 600; }
+/* Added Effects under type / range in the left column, so every box keeps the same height */
+.tc-s { display: flex; flex-direction: column; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--dim); }
+.tc-s b { color: var(--text); font-size: 12px; }
 /* rate rows: label, magnitude bar (share of the largest value of that stat), raw value, the game's rank letter */
 .rates { display: grid; grid-template-columns: auto 1fr 2.5ch 22px; gap: 3px 6px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }

@@ -28,7 +28,6 @@
   D.species.filter((s) => FEATURES.npcs || !isNpc(s)).forEach((s) => (members[groupOf(s)] ||= []).push(s));
   Object.values(members).forEach((l) => l.sort((a, b) =>
     (b.sub === b.main) - (a.sub === a.main) || (a.sub ?? 99) - (b.sub ?? 99) || a.id - b.id));
-  const pureOf = (k) => (k === APE ? members[APE][0] : members[k].find((s) => s.sub === s.main));
   const techsOf = (k) => (k === APE
     ? techsOf(GARU).map((t) => ({ ...t, name: t.nameApe ?? t.name, icon: t.iconApe ?? t.icon }))
     : D.techniques.filter((t) => t.genus === +k && (FEATURES.groupSkills || t.slot < 12)).sort((a, b) => a.slot - b.slot));
@@ -92,9 +91,9 @@
     s.resist.el.map((v, i) => resCell(ELEM[i + 1].icon, ELEM[i + 1].name, v, 'e' + i, `el-${i + 1}`)).join('') +
     `</div><div class="rgrid rcat">${s.resist.cat.map((v, i) => resCell(CAT[i + 1].icon, '', v, 'c' + i, 'cat')).join('')}</div></div>`;
   const monRow = (s) =>
-    // one box: header band (emblems | name) over the body (render | stats + lifespan bar with the growth type; a tap on
+    // one box: header band (emblems | name, monster type at the right) over the body (render | stats + lifespan bar with the growth type; a tap on
     // the box swaps the stats for the resists)
-    `<div class="box mrow${open.res.has(s.id) ? ' res' : ''}" data-mon="${s.id}"><div class="box-hl">${pair(s)}</div><b class="box-hr"><span class="tt bname">${esc(s.name)}</span></b>` +
+    `<div class="box mrow${open.res.has(s.id) ? ' res' : ''}" data-mon="${s.id}"><div class="box-hl">${pair(s)}</div><b class="box-hr"><span class="tt bname">${esc(s.name)}</span>${typeBadge(s)}</b>` +
     `<div class="box-l mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>` +
@@ -113,24 +112,24 @@
     const e = ELEM[t.element], c = CAT[t.category];
     const type = t.type === 0 ? `<span class="tt t-pow">${esc(TX.pow)}</span>` : t.type === 1 ? `<span class="tt t-int">${esc(TX.int)}</span>` : '';
     const range = t.range != null ? `<span class="tt" style="--c1:${RANGE_C[t.range]};--c2:${RANGE_C[t.range + 1]}">${esc(D.meta.ranges[t.range])}</span>` : '';
-    // same box as a monster row: header band (pictogram | name) over the body (type, range, category + element |
-    // guts cost, the four rates, Added Effects)
+    // same box as a monster row: header band (pictogram | name) over the body (category + element, type, range,
+    // Added Effects | guts cost, the four rates)
     return `<div class="box tcard"><div class="box-hl">${ico(t.icon, 'waza', t.name)}</div><b class="box-hr"><span class="tt bname">${esc(t.name)}</span></b>` +
-      `<div class="box-l tc-l"><span class="tc-i">${ico(c?.icon, 'ico')}${ico(e?.icon, 'ico', e?.name)}</span>${type}${range}</div>` +
+      `<div class="box-l tc-l"><span class="tc-i">${ico(c?.icon, 'ico')}${ico(e?.icon, 'ico', e?.name)}</span>${type}${range}` +
+      (t.effect && t.effect !== 'NONE' ? `<span class="tc-s">${esc(TX.effects)}<b>${esc(t.effect)}</b></span>` : '') + '</div>' +
       // guts cost: own bar, no E..S letter in the game
       `<div class="tc-r"><div class="rates"><i class="r-cost">Guts Cost</i>${magBar(t.guts, rateMax.guts, 'r-cost')}<b>${t.guts}</b><span></span>${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
         magBar(t[k], rateMax[k], cls) +
-        `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div>` +
-      (t.effect && t.effect !== 'NONE' ? `<div class="tc-s">${esc(TX.effects)} <b>${esc(t.effect)}</b></div>` : '') + '</div></div>';
+        `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div></div>`;
   };
 
   const BREED_VIEWS = {
     mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map(monRow).join('')}</div>` },
     techs: {
       label: 'Techniques',
-      // the breed's monster type, then one box per technique
+      // one box per technique
       body(k) {
-        return `<div class="ttype">${typeBadge(pureOf(k))}</div><div class="mlist">${techsOf(k).map(techRow).join('')}</div>`;
+        return `<div class="mlist">${techsOf(k).map(techRow).join('')}</div>`;
       },
     },
   };
