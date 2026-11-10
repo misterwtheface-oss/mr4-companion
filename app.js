@@ -50,8 +50,9 @@
   const ico = (src, cls = 'ico', title = '') => src ? `<img class="${cls}" src="${src}" alt="${esc(title)}" title="${esc(title)}">` : '';
   const TX = D.meta.texts, RANK_IMG = D.meta.rankIcons;
   // breed emblem: the game's face on a CSS disc + ring (after the game's res 0x8B blue disc and gold ring)
+  // Evo emblems (Maya, Piroro) carry their own disc + ring: class evo drops the CSS ones
   const emblem = (src, title = '', cls = 'emb') => src
-    ? `<span class="${cls}" title="${esc(title)}"><img src="${src}" alt="${esc(title)}"></span>` : '';
+    ? `<span class="${cls}${src.includes('icon/evo/') ? ' evo' : ''}" title="${esc(title)}"><img src="${src}" alt="${esc(title)}"></span>` : '';
   // main x sub emblems (faces per monster from the game's rule: Ape variants, special mains, "?" subs)
   const pair = (s) => `<span class="pair">${emblem(s.faces[0], breedName(s.main ?? SPECIAL), 'emb sm')}` +
     `<i class="x" aria-hidden="true"></i>${emblem(s.faces[1], BR[s.sub]?.name ?? '', 'emb sm')}</span>`;

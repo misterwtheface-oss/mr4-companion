@@ -6,6 +6,7 @@ Reads  ../_mr4_extract/web/data.js            (window.MR4_DATA, tools/build_data
        ../_mr4_extract/assets/renders/mr4/    (<species>_<Name>_35.png, 512 px 3/4 view, xgame_renders.py)
        ../_mr4_extract/assets/renders/evo/    (<evo breed>_<Name>_35.png: the 93 Evo imports, origin "evo" in data.js)
        ../_mr4_extract/data/monster/evo_species.json   (Evo import records: type + resists, tools/evo_records.py)
+       ../_mrevo_extract/assets/icons/emblem_NN_<Name>.png   (Evo emblems for Maya / Piroro, _mrevo tools/evo_emblems.py)
        ../_mr4_extract/data/assets/icon_map.json + assets/icons/   (code-backed icon map, tools/icon_map.py)
        ../_mr4_extract/assets/renders/mr4_items/  (<id>_<Name>_35.png, tools/item_renders.py)
        ../_mr4_extract/data/assets/ui_panels.json + assets/icons/panel/   (rank letters + rank table, tools/layouts.py export)
@@ -29,6 +30,8 @@ X = os.path.join(os.path.dirname(APP), "_mr4_extract")
 SRC = os.path.join(X, "web", "data.js")
 RENDERS = os.path.join(X, "assets", "renders", "mr4")
 EVO_RENDERS = os.path.join(X, "assets", "renders", "evo")
+EVO_ICONS = os.path.join(os.path.dirname(APP), "_mrevo_extract", "assets", "icons")
+EVO_EMBLEM = {"Maya": 23, "Piroro": 24}   # Evo emblem index = Evo birth-matrix row (evo_emblems.py)
 ITEM_RENDERS = os.path.join(X, "assets", "renders", "mr4_items")
 ICON_MAP = os.path.join(X, "data", "assets", "icon_map.json")
 ICONS = os.path.join(X, "assets", "icons")
@@ -151,10 +154,9 @@ def main():
     breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["icon"])} for b in im_map["breeds"]]
     if [b["id"] for b in breeds] != [b["id"] for b in d["breeds"] if b.get("origin") != "evo"]:
         errors.append("icon_map breeds do not cover every breed")
-    # Evo mains (Maya, Piroro): MR4 has no face art for them; their emblem = the pure breed's render thumbnail
-    # (provenance "evo-render", filled in after the species pictures are written)
+    # Evo mains (Maya, Piroro): MR4 has no face art for them; their emblem = Evo's own (evo_face below, filled in
+    # after the species loop)
     evo_mains = {b["id"]: b for b in d["breeds"] if b.get("origin") == "evo"}
-    evo_pure = {s["main"]: s["id"] for s in d["species"] if s.get("origin") == "evo" and s["main"] == s["sub"]}
     breeds += [{"id": b["id"], "name": b["name"], "icon": None, "origin": "evo"} for b in evo_mains.values()]
     face_rows = {b["tex"]: b for b in im_map["breeds"] + im_map["extra_faces"]}
     special_icon = icon(face_rows[0x26]["icon"])
@@ -240,11 +242,17 @@ def main():
                         "faces": faces(s["main"] if s["main"] is not None else sp_special.get(sid, 0x26), s["sub"]),
                         "disc": b["discObtainable"] if b else None})
 
-    def evo_face(main):   # an Evo main's emblem = its pure breed's thumbnail (provenance: evo-render)
-        p = f"assets/mon/s/{evo_pure.get(main)}.webp"
-        if not os.path.exists(os.path.join(APP, p)):
-            errors.append(f"evo main {main}: pure breed thumbnail {p} missing")
-        return ver(p)
+    def evo_face(main):   # an Evo main's emblem = Evo's own (disc + ring baked in; extract _mrevo tools/evo_emblems.py)
+        name = evo_mains[main]["name"]
+        src = os.path.join(EVO_ICONS, f"emblem_{EVO_EMBLEM[name]:02d}_{name}.png")
+        if not os.path.exists(src):
+            errors.append(f"evo main {name}: {src} missing (run _mrevo_extract/tools/evo_emblems.py)")
+            return None
+        dst = f"assets/icon/evo/{name.lower()}.png"
+        os.makedirs(os.path.join(APP, "assets", "icon", "evo"), exist_ok=True)
+        Image.open(src).save(os.path.join(APP, dst), optimize=True)
+        shipped.append(dst)
+        return ver(dst)
     for s in species:
         s["faces"] = [evo_face(f[1]) if isinstance(f, tuple) else f for f in s["faces"]]
     for b in breeds:
