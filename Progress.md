@@ -63,6 +63,11 @@
   category + element icons, type, range, Added Effects | guts cost, the four rates (every box the same height).
   Monster type badge moved from the Techniques screen into each monster's name band, right-aligned.
 
+- 2026-11-10 (Evo imports): the 93 Monster Rancher Evo monsters MR4 lacks are in the app (FEATURES.evo), on their MR4
+  main's page with an "Evo" tag; Maya / Piroro are two new breed tiles (app ids 48 / 49, emblem = pure render thumbnail,
+  techniques without pictograms). Numbers = extract tools/evo_records.py proposals (src per monster); grades that are a
+  stat->grade proposal have a dashed outline (decision open: copy a base's growth spread or set a custom one per new
+  base). Monster box tap now cycles stats -> resists -> info (Book description, starting trait, starting techniques).
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.
