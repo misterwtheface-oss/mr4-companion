@@ -58,9 +58,9 @@
   rest when the Status word reads Tired; lifespan / health charged on end-of-week values; fatigue gain ranges per drill),
   60 in-game condition screenshots (_mr4_extract/assets/advisor/), data files listed in _mr4_extract/APP.md § Data.
 - 2026-11-10 (user): the "Breed" tab is now "Techniques" (view key `techs`; an old saved `breed` falls back to Monsters).
-  It uses the monster rows' gold box (shared `.box` / `.box-hl` / `.box-hr` / `.box-l` in styles.css): a skills box
-  (header band = monster type, body = pictogram grid) and the selected technique's box (header = pictogram | name in the
-  gold title gradient; body = category + element icons, type, range | guts cost, the four rates, Added Effects).
+  No selector any more: the breed's monster type, then one box per technique in slot order, in the monster rows' gold
+  box (shared `.box` / `.box-hl` / `.box-hr` / `.box-l` in styles.css; list = `.mlist`): header = pictogram | name in the
+  gold title gradient; body = category + element icons, type, range | guts cost, the four rates, Added Effects.
 
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide

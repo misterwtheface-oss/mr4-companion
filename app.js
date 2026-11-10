@@ -102,19 +102,14 @@
     `<div class="mlife"><i>Lifespan</i><b>${s.lifespan}</b>${magBar(s.lifespan, statMax.lifespan, 'life')}` +
     `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div>${resists(s)}</div></div>`;
 
-  // techniques: pictogram grid by slot (as the game's Skills page), detail card for the selected one
+  // techniques: one box per technique, in slot order
   const RANGE_C = ['#f47468', '#f47468', '#f4dc64', '#f4dc64', '#78ec80', '#78ec80', '#78ec80', '#78ec80', '#78ec80'];
   // the four rate boxes of the game's technique page, in its label colours; letters = cmn_waza_rank (E..S)
   const RATES = [['damage', 'Life Damage', 'r-life'], ['withering', 'Guts Damage', 'r-guts'],
     ['sharpness', 'Critical Hit Rate', 'r-crit'], ['hit', 'Accuracy Rate', 'r-acc']];
   // techniques shown = the shown groups' sets (Ape shares Garu's numbers)
   const rateMax = magMax(shownGroups.filter((k) => k !== APE).flatMap((k) => techsOf(k)), ['guts', ...RATES.map(([k]) => k)], (t, k) => t[k]);
-  const skillGrid = (techs, sel) => `<div class="wgrid">${techs.filter((t) => t.slot < 12).map((t) =>
-    `<button class="wcell${t === sel ? ' on' : ''}" data-tech="${t.id}" style="grid-area:${Math.floor(t.slot / 4) + 1}/${t.slot % 4 + 1}">` +
-    `${ico(t.icon, 'waza', t.name)}</button>`).join('')}</div>`;
-  const extraTechs = (techs, sel) => techs.filter((t) => t.slot >= 12).map((t) =>
-    `<button class="xtech${t === sel ? ' on' : ''}" data-tech="${t.id}">${esc(t.name)}</button>`).join('');
-  const techDetail = (t) => {
+  const techRow = (t) => {
     const e = ELEM[t.element], c = CAT[t.category];
     const type = t.type === 0 ? `<span class="tt t-pow">${esc(TX.pow)}</span>` : t.type === 1 ? `<span class="tt t-int">${esc(TX.int)}</span>` : '';
     const range = t.range != null ? `<span class="tt" style="--c1:${RANGE_C[t.range]};--c2:${RANGE_C[t.range + 1]}">${esc(D.meta.ranges[t.range])}</span>` : '';
@@ -133,28 +128,14 @@
     mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map(monRow).join('')}</div>` },
     techs: {
       label: 'Techniques',
-      // skills box (header band: the breed's monster type; body: pictogram grid) + the selected technique's box
+      // the breed's monster type, then one box per technique
       body(k) {
-        const pure = pureOf(k), techs = techsOf(k), sel = techs.find((t) => t.id === open.tech[k]) || techs[0];
-        return `<div class="waza-page" data-k="${k}"><div class="box wbox"><div class="box-h">${typeBadge(pure)}</div>` +
-          `<div class="skills">${skillGrid(techs, sel)}</div><div class="xtechs">${extraTechs(techs, sel)}</div></div>` +
-          `<div class="tdetail">${sel ? techDetail(sel) : ''}</div></div>`;
+        return `<div class="ttype">${typeBadge(pureOf(k))}</div><div class="mlist">${techsOf(k).map(techRow).join('')}</div>`;
       },
     },
   };
 
-  const open = { breed: null, scroll: {}, tech: {}, res: new Set() };
-  // select a technique in place (no re-render of the sheet: keeps the scroll position)
-  function pickTech(id) {
-    const page = $('.waza-page');
-    if (!page) return;
-    const k = page.dataset.k === APE ? APE : +page.dataset.k, techs = techsOf(k), t = techs.find((x) => x.id === id);
-    if (!t) return;
-    open.tech[k] = id;
-    page.querySelector('.skills').innerHTML = skillGrid(techs, t);
-    page.querySelector('.xtechs').innerHTML = extraTechs(techs, t);
-    page.querySelector('.tdetail').innerHTML = techDetail(t);
-  }
+  const open = { breed: null, scroll: {}, res: new Set() };
   function showBreed() {
     const k = open.breed;
     if (k == null) { $('#overlay').hidden = true; document.body.style.overflow = ''; return; }
@@ -188,8 +169,6 @@
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-breed]');
     if (b) { pushed = true; location.hash = 'b/' + b.dataset.breed; return; }
-    const tb = e.target.closest('[data-tech]');
-    if (tb) { pickTech(+tb.dataset.tech); return; }
     const mr = e.target.closest('[data-mon]');
     if (mr) {   // stats <-> resists in place (no re-render: keeps the scroll position)
       const id = +mr.dataset.mon;

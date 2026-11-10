@@ -122,20 +122,9 @@ main { padding: 12px 10px; }
 .el-5 { --g: #4fcfb8; } .el-6 { --g: #6ccf6a; } .el-7 { --g: #e87aa8; } .el-8 { --g: #a070e0; } .cat { --g: #c8a55a; }
 .rgrid .bar { --c: color-mix(in oklab, var(--g) var(--soft), var(--mute)); }
 
-/* techniques view: skills box (type band, pictogram grid by slot 4 x 3) + the selected technique's box */
-.waza-page { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-.wbox { display: block; }
-.skills { padding: 8px; }
-.wgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 96px)); grid-template-rows: repeat(3, auto); gap: 6px;
-  justify-content: center; }
-.wcell { padding: 3px; border: 2px solid transparent; border-radius: 6px; background: none; cursor: pointer; line-height: 0; }
-.wcell.on { border-color: var(--gold); box-shadow: 0 0 8px rgba(200, 165, 90, .45); }
+/* techniques view: the breed's monster type, then one box per technique (list = .mlist) */
+.ttype { margin: 12px 0 8px; font-size: 14px; font-weight: 600; }
 .waza { width: 100%; height: auto; aspect-ratio: 3 / 2; image-rendering: pixelated; display: block; }
-.xtechs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 8px 8px; }
-.xtechs:empty { display: none; }
-.xtech { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--text);
-  font-size: 13px; cursor: pointer; }
-.xtech.on { border-color: var(--gold); color: var(--gold-hi); font-weight: 600; }
 .tcard .box-hl { padding: 6px 0; }
 .tcard .box-hl .waza { width: 72px; }
 /* left column: category + element sockets, then type and range */
@@ -168,7 +157,6 @@ main { padding: 12px 10px; }
 @media (min-width: 720px) {
   .top, main { padding-left: max(16px, calc(50% - 560px)); padding-right: max(16px, calc(50% - 560px)); }
   .emblems { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px 12px; }
-  .waza-page { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; align-items: start; }
   .overlay { align-items: center; justify-content: center; }
   .sheet { width: min(860px, 94vw); height: 88vh; border: 2px solid var(--gold); border-radius: 14px; }
 }
