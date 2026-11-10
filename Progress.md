@@ -105,7 +105,7 @@ Backlog (user, 2026-11-08):
 - [ ] Book routes: real album titles for discs; "From Book" stat generation (extract REQUESTS / 05_summon Q5).
 - [ ] Planner features (raising, combining) after the encyclopedia.
 - [ ] Data status in the extract is "raw extract, not yet verified in game".
-- [ ] Monster render shadows (user 2026-11-09, picked look "D"; parked while the user tests performance, run it when
+- [x] Monster render shadows (DONE + live 2026-11-10, Evo imports included; user 2026-11-09, picked look "D"; parked while the user tests performance, run it when
       the PC is free): no shadow toward the viewer. Look D = jobs_lit settings `"rim_shadow": false, "fill": "suns"`
       (rim light casts no forward shadow; grey world fill replaced by 6 shadowless suns, so no dark halo round the
       feet; key light unchanged, its shadow falls back and to the side). Options live in
