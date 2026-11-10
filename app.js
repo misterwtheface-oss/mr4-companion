@@ -7,13 +7,18 @@
   // Millielle, Balbalo, JackInTheCho, Spartacus; all on the never-from-a-disc list, extract 05_summon § 1.5); kept in data
   // groupSkills: the 4 picture-less techniques per breed (slots 12+: Counter, a unique one, Tag Skill 1 / 2) are group /
   // special attacks, not comparable with the 12 core ones; hidden until they get a home, and left out of the bar scale
-  const FEATURES = { bosses: false, npcs: false, groupSkills: false };
+  // evo: the 93 Monster Rancher Evo imports (content mods, extract MONSTER_IMPORT.md § 6) incl. the new mains Maya / Piroro;
+  // their numbers are converted proposals (src per monster), not game data yet
+  const FEATURES = { bosses: false, npcs: false, groupSkills: false, evo: true };
   const isNpc = (s) => STATS.every((x) => s.base[x] === 100);
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const by = (arr) => Object.fromEntries(arr.map((x) => [x.id, x]));
 
-  const BR = by(D.breeds);
+  const isEvo = (x) => x.origin === 'evo';
+  const BREEDS = D.breeds.filter((b) => FEATURES.evo || !isEvo(b));
+  const BR = by(BREEDS);
+  const TR = by(D.traits), TECH = by(D.techniques);
   const STATS = D.meta.stats;
   const ELEM = by(D.meta.elements), CAT = by(D.meta.categories), MTYPE = by(D.meta.monTypes);
   const SPECIAL = 'x';   // the 5 event monsters with no main breed
@@ -25,7 +30,7 @@
 
   // monsters per main breed: pure breed first, then by sub breed
   const members = {};
-  D.species.filter((s) => FEATURES.npcs || !isNpc(s)).forEach((s) => (members[groupOf(s)] ||= []).push(s));
+  D.species.filter((s) => (FEATURES.npcs || !isNpc(s)) && (FEATURES.evo || !isEvo(s))).forEach((s) => (members[groupOf(s)] ||= []).push(s));
   Object.values(members).forEach((l) => l.sort((a, b) =>
     (b.sub === b.main) - (a.sub === a.main) || (a.sub ?? 99) - (b.sub ?? 99) || a.id - b.id));
   const techsOf = (k) => (k === APE
@@ -55,7 +60,7 @@
 
   // ---- main page: breed emblems ----
   function renderHome() {
-    const keys = D.breeds.flatMap((b) => (b.id === GARU && members[APE] ? [b.id, APE] : [b.id]))
+    const keys = BREEDS.flatMap((b) => (b.id === GARU && members[APE] ? [b.id, APE] : [b.id]))
       .concat(FEATURES.bosses && members[SPECIAL] ? [SPECIAL] : []);
     $('#view').innerHTML = `<div class="emblems">${keys.map((k) =>
       `<button class="emblem" data-breed="${k}">${emblem(groupIcon(k), breedName(k))}` +
@@ -90,16 +95,22 @@
   const resists = (s) => `<div class="mres"><div class="rgrid">` +
     s.resist.el.map((v, i) => resCell(ELEM[i + 1].icon, ELEM[i + 1].name, v, 'e' + i, `el-${i + 1}`)).join('') +
     `</div><div class="rgrid rcat">${s.resist.cat.map((v, i) => resCell(CAT[i + 1].icon, '', v, 'c' + i, 'cat')).join('')}</div></div>`;
+  // third face of a monster box: Book description, starting trait(s), starting techniques
+  const info = (s) => `<div class="minfo">` +
+    (s.desc ? `<p>${esc(s.desc)}</p>` : '') +
+    `<div class="mi-row">${s.traits.map((t) => `<span class="chip trait" title="${esc(TR[t]?.desc)}">${esc(TR[t]?.name)}</span>`).join('')}</div>` +
+    `<div class="mi-row">${s.startTechs.map((t) => `<span class="chip">${ico(TECH[t]?.icon, 'waza')}${esc(TECH[t]?.name)}</span>`).join('')}</div></div>`;
+  const FACE_CLS = ['', ' res', ' info'];
   const monRow = (s) =>
     // one box: header band (emblems | name, monster type at the right) over the body (render | stats + lifespan bar with the growth type; a tap on
     // the box swaps the stats for the resists)
-    `<div class="box mrow${open.res.has(s.id) ? ' res' : ''}" data-mon="${s.id}"><div class="box-hl">${pair(s)}</div><b class="box-hr"><span class="tt bname">${esc(s.name)}</span>${typeBadge(s)}</b>` +
+    `<div class="box mrow${FACE_CLS[open.face[s.id] || 0]}" data-mon="${s.id}"><div class="box-hl">${pair(s)}</div><b class="box-hr"><span class="tt bname">${esc(s.name)}</span>${isEvo(s) ? '<span class="evo">Evo</span>' : ''}${typeBadge(s)}</b>` +
     `<div class="box-l mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
-      `<span class="g g${s.grade[x]}">${s.grade[x]}</span>` +
+      `<span class="g g${s.grade[x]}${s.src?.grade === 'proposal' ? ' prop' : ''}">${s.grade[x]}</span>` +
       `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
     `<div class="mlife"><i>Lifespan</i><b>${s.lifespan}</b>${magBar(s.lifespan, statMax.lifespan, 'life')}` +
-    `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div>${resists(s)}</div></div>`;
+    `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div>${resists(s)}${info(s)}</div></div>`;
 
   // techniques: one box per technique, in slot order
   const RANGE_C = ['#f47468', '#f47468', '#f4dc64', '#f4dc64', '#78ec80', '#78ec80', '#78ec80', '#78ec80', '#78ec80'];
@@ -134,7 +145,7 @@
     },
   };
 
-  const open = { breed: null, scroll: {}, res: new Set() };
+  const open = { breed: null, scroll: {}, face: {} };   // face per monster: 0 stats, 1 resists, 2 info
   function showBreed() {
     const k = open.breed;
     if (k == null) { $('#overlay').hidden = true; document.body.style.overflow = ''; return; }
@@ -169,10 +180,10 @@
     const b = e.target.closest('[data-breed]');
     if (b) { pushed = true; location.hash = 'b/' + b.dataset.breed; return; }
     const mr = e.target.closest('[data-mon]');
-    if (mr) {   // stats <-> resists in place (no re-render: keeps the scroll position)
-      const id = +mr.dataset.mon;
-      open.res.delete(id) || open.res.add(id);
-      mr.classList.toggle('res', open.res.has(id)); return;
+    if (mr) {   // stats -> resists -> info in place (no re-render: keeps the scroll position)
+      const id = +mr.dataset.mon, f = ((open.face[id] || 0) + 1) % 3;
+      open.face[id] = f;
+      mr.classList.toggle('res', f === 1); mr.classList.toggle('info', f === 2); return;
     }
     const v = e.target.closest('[data-view]');
     if (v) {

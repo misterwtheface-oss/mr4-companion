@@ -115,6 +115,21 @@ main { padding: 12px 10px; }
 .mrow-m > * { grid-area: 1 / 1; }
 .mres, .mrow.res .mstats { visibility: hidden; }
 .mrow.res .mres { visibility: visible; }
+/* info face (description, trait, starting techniques): laid over the same cell, scrolls inside it, never sets the height */
+.mrow-m { position: relative; }
+.minfo { position: absolute; inset: 0; padding: 7px 10px 8px; overflow-y: auto; visibility: hidden; font-size: 13px; line-height: 1.35; }
+.mrow.info .minfo { visibility: visible; }
+.mrow.info .mstats { visibility: hidden; }
+.minfo p { margin: 0 0 6px; color: var(--steel); }
+.mi-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 10px;
+  font-size: 12px; white-space: nowrap; }
+.chip.trait { border-color: var(--gold); color: var(--gold-hi); }
+.chip .waza { width: 27px; height: 18px; display: inline-block; }
+/* Evo imports: origin tag; grades that are a proposal (no source value) get a dashed outline */
+.box-hr .evo { margin-left: 6px; padding: 0 5px; border: 1px solid var(--steel); border-radius: 4px; font-size: 10px;
+  font-weight: 600; letter-spacing: .06em; color: var(--steel); }
+.mstats .g.prop { outline: 1px dashed var(--steel); outline-offset: 1px; border-radius: 2px; }
 .rgrid { display: grid; grid-template-columns: auto 3ch 1fr auto 3ch 1fr; gap: 3px 6px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }
 .rgrid > b { font-weight: 600; text-align: right; }

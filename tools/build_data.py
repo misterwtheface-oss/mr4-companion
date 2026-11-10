@@ -4,6 +4,8 @@
 
 Reads  ../_mr4_extract/web/data.js            (window.MR4_DATA, tools/build_data_js.py in the extract)
        ../_mr4_extract/assets/renders/mr4/    (<species>_<Name>_35.png, 512 px 3/4 view, xgame_renders.py)
+       ../_mr4_extract/assets/renders/evo/    (<evo breed>_<Name>_35.png: the 93 Evo imports, origin "evo" in data.js)
+       ../_mr4_extract/data/monster/evo_species.json   (Evo import records: type + resists, tools/evo_records.py)
        ../_mr4_extract/data/assets/icon_map.json + assets/icons/   (code-backed icon map, tools/icon_map.py)
        ../_mr4_extract/assets/renders/mr4_items/  (<id>_<Name>_35.png, tools/item_renders.py)
        ../_mr4_extract/data/assets/ui_panels.json + assets/icons/panel/   (rank letters + rank table, tools/layouts.py export)
@@ -26,6 +28,7 @@ APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 X = os.path.join(os.path.dirname(APP), "_mr4_extract")
 SRC = os.path.join(X, "web", "data.js")
 RENDERS = os.path.join(X, "assets", "renders", "mr4")
+EVO_RENDERS = os.path.join(X, "assets", "renders", "evo")
 ITEM_RENDERS = os.path.join(X, "assets", "renders", "mr4_items")
 ICON_MAP = os.path.join(X, "data", "assets", "icon_map.json")
 ICONS = os.path.join(X, "assets", "icons")
@@ -100,7 +103,13 @@ def main():
     for f in os.listdir(RENDERS):
         m = re.match(r"(\d{3})_(.+)_35\.png$", f)
         if m:
-            renders[int(m.group(1))] = (f, m.group(2))
+            renders[int(m.group(1))] = (RENDERS, f, m.group(2))
+    # Evo imports: render file keyed by the Evo breed id -> the app species id (data.js evoBreed)
+    evo_sid = {s["evoBreed"]: s["id"] for s in d["species"] if s.get("origin") == "evo"}
+    for f in os.listdir(EVO_RENDERS) if os.path.isdir(EVO_RENDERS) else []:
+        m = re.match(r"(\d{3})_(.+)_35\.png$", f)
+        if m and int(m.group(1)) in evo_sid:
+            renders[evo_sid[int(m.group(1))]] = (EVO_RENDERS, f, m.group(2))
 
     im_map = json.load(open(ICON_MAP, encoding="utf-8"))
     errors.extend("icon_map: " + e for e in im_map["errors"])
@@ -108,6 +117,8 @@ def main():
           json.load(open(os.path.join(X, "data", "battle", "techniques.json"), encoding="utf-8"))["records"]}
     sp_raw = json.load(open(os.path.join(X, "data", "monster", "species.json"), encoding="utf-8"))
     sp_rows = sp_raw if isinstance(sp_raw, list) else sp_raw["records"]
+    sp_rows = sp_rows + [dict(e["record"], index=e["mr4_index"]) for e in
+                         json.load(open(os.path.join(X, "data", "monster", "evo_species.json"), encoding="utf-8"))["breeds"]]
     sp_type = {r["index"]: r["var_A9"] for r in sp_rows}
     # battle resists (extract 01_monster var 0x4A-0x54, 03_battle +0x994 / +0x998): element affinity by element id 1..8
     # (Fire, Ice, Thunder, Water, Wind, Earth, Heart, Magic) = vars 0x52, 0x51, 0x50, 0x4E, 0x4F, 0x4D, 0x53, 0x54;
@@ -138,13 +149,21 @@ def main():
     mon_types = [{"id": t["id"], "name": t["label"], "icon": icon(t["icon"])} for t in im_map["monster_types"]]
     # breed faces (res 0x8A, art-matched by id); "?" face 38 stands for the special monsters with no main breed
     breeds = [{"id": b["id"], "name": b["name"], "icon": icon(b["icon"])} for b in im_map["breeds"]]
-    if [b["id"] for b in breeds] != [b["id"] for b in d["breeds"]]:
+    if [b["id"] for b in breeds] != [b["id"] for b in d["breeds"] if b.get("origin") != "evo"]:
         errors.append("icon_map breeds do not cover every breed")
+    # Evo mains (Maya, Piroro): MR4 has no face art for them; their emblem = the pure breed's render thumbnail
+    # (provenance "evo-render", filled in after the species pictures are written)
+    evo_mains = {b["id"]: b for b in d["breeds"] if b.get("origin") == "evo"}
+    evo_pure = {s["main"]: s["id"] for s in d["species"] if s.get("origin") == "evo" and s["main"] == s["sub"]}
+    breeds += [{"id": b["id"], "name": b["name"], "icon": None, "origin": "evo"} for b in evo_mains.values()]
     face_rows = {b["tex"]: b for b in im_map["breeds"] + im_map["extra_faces"]}
     special_icon = icon(face_rows[0x26]["icon"])
 
     def faces(main, sub):
         # FUN_00296a30 (extract APP.md § Icon map): face index of the main and sub slot of the Mon info breed row
+        if main in evo_mains or sub in evo_mains:          # resolved after the pictures exist (evo_face below)
+            return [("evo", main) if main in evo_mains else faces(main, main)[0],
+                    ("evo", sub) if sub in evo_mains else faces(0, sub)[1]]   # main 0: no Ape / special rule
         f_main = main
         if main == 0x1A and sub in (0x23, 0x24, 0x25):   # FUN_0028a6b0: Garu + Ape sub
             f_main = {0x25: 0x27, 0x24: 0x28, 0x23: 0x29}[sub]
@@ -193,12 +212,14 @@ def main():
             continue  # ids 340-345: no name, unreachable (extract hygiene.txt)
         sid = s["id"]
         if sid in renders:
-            f, rname = renders[sid]
+            rdir, f, rname = renders[sid]
             if norm(rname) != norm(s["name"]):
                 errors.append(f"species {sid} {s['name']}: render name {rname}")
-            img = f"render:{f}"
-            if images:
-                im = crop_model(Image.open(os.path.join(RENDERS, f)).convert("RGBA"))
+            img = f"render:{os.path.basename(rdir)}/{f}"
+            # Evo pictures are few: written whenever missing, --no-images included
+            if images or (rdir == EVO_RENDERS and not os.path.exists(os.path.join(MON, "s", f"{sid}.webp"))):
+                os.makedirs(os.path.join(MON, "s"), exist_ok=True)
+                im = crop_model(Image.open(os.path.join(rdir, f)).convert("RGBA"))
                 save_webp(im, os.path.join(MON, f"{sid}.webp"), DETAIL)
                 save_webp(im, os.path.join(MON, "s", f"{sid}.webp"), THUMB)
         else:
@@ -211,11 +232,24 @@ def main():
                     errors.append(f"species {sid}: {k} id {i} not found")
         b = book.get(sid)
         species.append({k: s[k] for k in ("id", "name", "main", "sub", "base", "grade", "growthMod", "growthType",
-                                          "lifespan", "traits", "favItems", "startTechs")} |
+                                          "lifespan", "traits", "favItems", "startTechs", "desc", "origin")} |
+                       # Evo imports: where the numbers came from (stats / grade / trait: evo | rule | proposal | default)
+                       ({"src": s["src"]} if s.get("src") else {}) |
                        {"img": img, "type": sp_type.get(sid), "resist": sp_resist.get(sid), "growthPct": growth_pct(s), "book": b["routes"] if b else None,
                         "pic": [ver(f"assets/mon/{sid}.webp"), ver(f"assets/mon/s/{sid}.webp")] if img.startswith("render:") else None,
                         "faces": faces(s["main"] if s["main"] is not None else sp_special.get(sid, 0x26), s["sub"]),
                         "disc": b["discObtainable"] if b else None})
+
+    def evo_face(main):   # an Evo main's emblem = its pure breed's thumbnail (provenance: evo-render)
+        p = f"assets/mon/s/{evo_pure.get(main)}.webp"
+        if not os.path.exists(os.path.join(APP, p)):
+            errors.append(f"evo main {main}: pure breed thumbnail {p} missing")
+        return ver(p)
+    for s in species:
+        s["faces"] = [evo_face(f[1]) if isinstance(f, tuple) else f for f in s["faces"]]
+    for b in breeds:
+        if b.get("origin") == "evo":
+            b["icon"] = evo_face(b["id"])
 
     # ids 128-133: no name, not on the calendar (extract hygiene.txt)
     tournaments = [t for t in d["tournaments"] if t["name"]]
@@ -228,6 +262,14 @@ def main():
 
     techniques = []
     for t in d["techniques"]:
+        if t.get("origin") == "evo":   # Maya / Piroro: proposed MR4 numbers, no MR4 pictogram (icon none)
+            techniques.append({k: t[k] for k in ("id", "genus", "slot", "name", "type", "guts", "hit", "sharpness",
+                                                  "damage", "withering", "heal", "followup", "element", "category")} |
+                              {"range": t["range"] if t["range"] in ranges else None,
+                               "effect": msg_db.get(0xAF + t["effect"]) if 0 <= t["effect"] < 0x22 else None,
+                               "rank": {c: waza_rank(c, t[c]) for c in wr["cols"]}, "nameApe": None,
+                               "icon": None, "iconApe": None, "origin": "evo"})
+            continue
         r = sk.get((t["genus"], t["slot"]))
         ti = tech_icon.get(t["id"])
         if r is None or ti is None or ti["name"] != t["name"]:
