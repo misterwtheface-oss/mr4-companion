@@ -53,18 +53,21 @@ main { padding: 12px 10px; }
 .seg button.on { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
 .sheet-body { flex: 1; overflow-y: auto; padding: 0 12px 24px; border-top: 1px solid var(--line); }
 
-/* monster rows: one gold box = header band (emblems | name) over the body (render | stats); per stat: label, base,
-   magnitude bar, growth grade, gain %; then lifespan as a bar with the growth type */
-.mlist { display: flex; flex-direction: column; gap: 8px; }
-.mrow { display: grid; grid-template-columns: 124px 1fr; grid-template-rows: auto 1fr; overflow: hidden;
+/* gold box shared by monster rows and techniques: header band (left cell | name, or one full-width .box-h) over the
+   body (left column | right column) */
+.box { display: grid; grid-template-columns: 124px 1fr; grid-template-rows: auto 1fr; overflow: hidden;
   border: 2px solid var(--gold); border-radius: var(--r); }
-.mrow-hl, .mrow-hr { background: var(--panel2); border-bottom: 1px solid var(--gold); padding: 4px 0; }
-.mrow-hl { display: flex; justify-content: center; border-right: 1px solid var(--gold); }
-.mrow-hr { display: flex; align-items: center; padding: 0 10px; min-width: 0; }
+.box-hl, .box-hr, .box-h { background: var(--panel2); border-bottom: 1px solid var(--gold); padding: 4px 0; }
+.box-hl { display: flex; justify-content: center; border-right: 1px solid var(--gold); }
+.box-hr { display: flex; align-items: center; padding: 0 10px; min-width: 0; }
+.box-h { grid-column: 1 / -1; display: flex; align-items: center; padding: 6px 10px; font-size: 14px; font-weight: 600; }
+.box-l { border-right: 1px solid var(--gold); }
 /* name in the game's two-colour text gradient (.tt), gold, with a dark drop shadow */
-.tt.mname { --c1: #fff1c4; --c2: #c9963c; --soft: 100%; font-size: 17px; font-weight: 800; letter-spacing: .05em; min-width: 0;
+.tt.bname { --c1: #fff1c4; --c2: #c9963c; --soft: 100%; font-size: 17px; font-weight: 800; letter-spacing: .05em; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; filter: drop-shadow(0 1px 0 #1b1508) drop-shadow(0 0 2px #000a); }
-.mrow-pic { border-right: 1px solid var(--gold); }
+/* monster rows: header band = emblems | name; body = render | stats; per stat: label, base, magnitude bar, growth
+   grade, gain %; then lifespan as a bar with the growth type */
+.mlist { display: flex; flex-direction: column; gap: 8px; }
 /* main x sub: a gold "x" between the emblems, after the game's breed-row mark */
 .pair { display: inline-flex; align-items: center; gap: 2px; flex: none; }
 .x { position: relative; width: 16px; height: 16px; }
@@ -119,25 +122,26 @@ main { padding: 12px 10px; }
 .el-5 { --g: #4fcfb8; } .el-6 { --g: #6ccf6a; } .el-7 { --g: #e87aa8; } .el-8 { --g: #a070e0; } .cat { --g: #c8a55a; }
 .rgrid .bar { --c: color-mix(in oklab, var(--g) var(--soft), var(--mute)); }
 
-/* breed view */
-.sec { margin-top: 12px; }
-.sec h3 { margin: 0 0 6px; font-size: 13px; color: var(--gold); letter-spacing: .05em; text-transform: uppercase; }
-/* techniques: the game's pictograms in slot order (4 x 3), detail card for the selected one */
-.wgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 96px)); grid-template-rows: repeat(3, auto); gap: 6px; }
+/* techniques view: skills box (type band, pictogram grid by slot 4 x 3) + the selected technique's box */
+.waza-page { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.wbox { display: block; }
+.skills { padding: 8px; }
+.wgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 96px)); grid-template-rows: repeat(3, auto); gap: 6px;
+  justify-content: center; }
 .wcell { padding: 3px; border: 2px solid transparent; border-radius: 6px; background: none; cursor: pointer; line-height: 0; }
 .wcell.on { border-color: var(--gold); box-shadow: 0 0 8px rgba(200, 165, 90, .45); }
 .waza { width: 100%; height: auto; aspect-ratio: 3 / 2; image-rendering: pixelated; display: block; }
-.xtechs { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.xtechs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 8px 8px; }
 .xtechs:empty { display: none; }
 .xtech { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--text);
   font-size: 13px; cursor: pointer; }
 .xtech.on { border-color: var(--gold); color: var(--gold-hi); font-weight: 600; }
-.tcard { margin-top: 8px; padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
-.tc-h { display: flex; align-items: center; gap: 10px; }
-.tc-h .waza { width: 72px; flex: none; }
-.tc-n { flex: 1; min-width: 0; }
-.tc-n > b { font-size: 16px; }
-.tc-m { display: flex; gap: 10px; margin-top: 2px; font-size: 12px; font-weight: 700; }
+.tcard .box-hl { padding: 6px 0; }
+.tcard .box-hl .waza { width: 72px; }
+/* left column: category + element sockets, then type and range */
+.tc-l { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px 4px;
+  background: var(--panel); font-size: 12px; font-weight: 700; text-align: center; }
+.tc-r { min-width: 0; padding: 7px 10px 8px; }
 /* type / range text in the game's two-colour gradients */
 .tt { --c1: #fff; --c2: #fff; background: linear-gradient(color-mix(in oklab, var(--c1) var(--soft), var(--mute)) 35%,
   color-mix(in oklab, var(--c2) var(--soft), var(--mute))); -webkit-background-clip: text;
@@ -145,14 +149,14 @@ main { padding: 12px 10px; }
 .t-pow { --c1: #f0d840; --c2: #40d450; } .t-int { --c1: #40d450; --c2: #78ec80; }
 .tc-i { display: inline-flex; gap: 4px; flex: none; }
 .tc-i .ico { width: 28px; height: 28px; }
-.tc-s { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 6px; font-size: 13px; color: var(--dim); }
+.tc-s { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); font-size: 13px; color: var(--dim); }
 .tc-s b { color: var(--text); font-weight: 600; }
 /* rate rows: label, magnitude bar (share of the largest value of that stat), raw value, the game's rank letter */
-.rates { display: grid; grid-template-columns: auto 1fr 2.5ch 26px; gap: 4px 8px; align-items: center; margin-top: 10px;
+.rates { display: grid; grid-template-columns: auto 1fr 2.5ch 22px; gap: 3px 6px; align-items: center;
   font-variant-numeric: tabular-nums; font-size: 13px; }
 .rates > i { font-style: normal; font-weight: 700; color: var(--c); white-space: nowrap; }
 .rates > b { text-align: right; font-weight: 600; }
-.rates > img { width: 26px; height: 26px; image-rendering: pixelated; filter: saturate(.7) brightness(.92); }
+.rates > img { width: 22px; height: 22px; image-rendering: pixelated; filter: saturate(.7) brightness(.92); }
 .rates .bar { height: 8px; }
 /* the game's rate label colours (Life Damage red, Guts Damage cyan, Critical yellow, Accuracy magenta) */
 .r-life { --g: #e83a3a; } .r-guts { --g: #22b8a8; } .r-crit { --g: #d8cf3a; } .r-acc { --g: #d8459e; } .r-cost { --g: #4f8fe6; }
@@ -164,10 +168,7 @@ main { padding: 12px 10px; }
 @media (min-width: 720px) {
   .top, main { padding-left: max(16px, calc(50% - 560px)); padding-right: max(16px, calc(50% - 560px)); }
   .emblems { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px 12px; }
-  .waza-page { display: grid; grid-template-columns: auto 1fr; gap: 0 16px; align-items: start; }
-  .waza-page > h3 { grid-column: 1 / -1; }
-  .waza-page .tdetail { grid-column: 2; grid-row: 2 / span 2; }
-  .waza-page .tcard { margin-top: 0; }
+  .waza-page { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; align-items: start; }
   .overlay { align-items: center; justify-content: center; }
   .sheet { width: min(860px, 94vw); height: 88vh; border: 2px solid var(--gold); border-radius: 14px; }
 }

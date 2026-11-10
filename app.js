@@ -94,8 +94,8 @@
   const monRow = (s) =>
     // one box: header band (emblems | name) over the body (render | stats + lifespan bar with the growth type; a tap on
     // the box swaps the stats for the resists)
-    `<div class="mrow${open.res.has(s.id) ? ' res' : ''}" data-mon="${s.id}"><div class="mrow-hl">${pair(s)}</div><b class="mrow-hr"><span class="tt mname">${esc(s.name)}</span></b>` +
-    `<div class="mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
+    `<div class="box mrow${open.res.has(s.id) ? ' res' : ''}" data-mon="${s.id}"><div class="box-hl">${pair(s)}</div><b class="box-hr"><span class="tt bname">${esc(s.name)}</span></b>` +
+    `<div class="box-l mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}">${s.grade[x]}</span>` +
       `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
@@ -118,24 +118,27 @@
     const e = ELEM[t.element], c = CAT[t.category];
     const type = t.type === 0 ? `<span class="tt t-pow">${esc(TX.pow)}</span>` : t.type === 1 ? `<span class="tt t-int">${esc(TX.int)}</span>` : '';
     const range = t.range != null ? `<span class="tt" style="--c1:${RANGE_C[t.range]};--c2:${RANGE_C[t.range + 1]}">${esc(D.meta.ranges[t.range])}</span>` : '';
-    return `<div class="tcard"><div class="tc-h">${ico(t.icon, 'waza', t.name)}<div class="tc-n"><b>${esc(t.name)}</b>` +
-      `<div class="tc-m">${type}${range}</div></div><span class="tc-i">${ico(c?.icon, 'ico')}${ico(e?.icon, 'ico', e?.name)}</span></div>` +
-      (t.effect && t.effect !== 'NONE' ? `<div class="tc-s"><span>${esc(TX.effects)} <b>${esc(t.effect)}</b></span></div>` : '') +
+    // same box as a monster row: header band (pictogram | name) over the body (type, range, category + element |
+    // guts cost, the four rates, Added Effects)
+    return `<div class="box tcard"><div class="box-hl">${ico(t.icon, 'waza', t.name)}</div><b class="box-hr"><span class="tt bname">${esc(t.name)}</span></b>` +
+      `<div class="box-l tc-l"><span class="tc-i">${ico(c?.icon, 'ico')}${ico(e?.icon, 'ico', e?.name)}</span>${type}${range}</div>` +
       // guts cost: own bar, no E..S letter in the game
-      `<div class="rates"><i class="r-cost">Guts Cost</i>${magBar(t.guts, rateMax.guts, 'r-cost')}<b>${t.guts}</b><span></span>${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
+      `<div class="tc-r"><div class="rates"><i class="r-cost">Guts Cost</i>${magBar(t.guts, rateMax.guts, 'r-cost')}<b>${t.guts}</b><span></span>${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
         magBar(t[k], rateMax[k], cls) +
-        `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div>`;
+        `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div>` +
+      (t.effect && t.effect !== 'NONE' ? `<div class="tc-s">${esc(TX.effects)} <b>${esc(t.effect)}</b></div>` : '') + '</div></div>';
   };
 
   const BREED_VIEWS = {
     mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map(monRow).join('')}</div>` },
-    breed: {
-      label: 'Breed',
+    techs: {
+      label: 'Techniques',
+      // skills box (header band: the breed's monster type; body: pictogram grid) + the selected technique's box
       body(k) {
         const pure = pureOf(k), techs = techsOf(k), sel = techs.find((t) => t.id === open.tech[k]) || techs[0];
-        return `<div class="sec"><h3>Type</h3>${typeBadge(pure)}</div>` +
-          `<div class="sec waza-page" data-k="${k}"><h3>${esc(TX.skills)}</h3><div class="skills">${skillGrid(techs, sel)}</div>` +
-          `<div class="xtechs">${extraTechs(techs, sel)}</div><div class="tdetail">${sel ? techDetail(sel) : ''}</div></div>`;
+        return `<div class="waza-page" data-k="${k}"><div class="box wbox"><div class="box-h">${typeBadge(pure)}</div>` +
+          `<div class="skills">${skillGrid(techs, sel)}</div><div class="xtechs">${extraTechs(techs, sel)}</div></div>` +
+          `<div class="tdetail">${sel ? techDetail(sel) : ''}</div></div>`;
       },
     },
   };
