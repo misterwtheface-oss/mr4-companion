@@ -224,11 +224,12 @@
       return { lv, rows: [...pool.map(([id, w]) => [TR[id]?.name, w / (sum + 1)]), ['Nothing', 1 / (sum + 1)]] };
     }).filter((d) => d.lv.length);
     const r = magMax(draws.flatMap((d) => d.rows), ['p'], (x) => x[1]).p;
-    return sec('Birth', `<div class="box mp-one"><div class="lr-c">${s.startTechs.map((id) => TECH[id]).map((t) =>
+    // Evo imports: their birth traits / armour ids are converted proposals (dashed boxes, as the Info side's proposal grades)
+    return (isEvo(s) ? '<div class="lprop">' : '<div>') + sec('Birth', `<div class="box mp-one"><div class="lr-c">${s.startTechs.map((id) => TECH[id]).map((t) =>
         `<span class="chip">${ico(t.icon, 'waza')}${esc(t.name)}</span>`).join('')}${s.traits.map(trChip).join('')}</div></div>`) +
       (rows.length ? sec('Expedition levels', `<div class="box mp-one"><div class="lrows">${rows.join('')}</div></div>`) : '') +
       draws.map((d) => sec(`Random trait · Lv ${lvRanges(d.lv)}`, `<div class="box mp-one"><div class="lodds">${d.rows.map(([n, p]) =>
-        `<span>${esc(n)}</span>${magBar(p, r, 'odds')}<b>${pct(p)}</b>`).join('')}</div></div>`)).join('');
+        `<span>${esc(n)}</span>${magBar(p, r, 'odds')}<b>${pct(p)}</b>`).join('')}</div></div>`)).join('') + '</div>';
   };
   const MON_VIEWS = { info: ['Info', monPage], learn: ['Learning', learnPage] };
 

@@ -99,6 +99,9 @@
   of the main breed if not known, fixed Ride / Search trait if not owned) and one odds box per random band (weight /
   (sum + 1), Nothing = 1 / (sum + 1), species pool as born; odds shift as traits are gained). Per monster because armour
   and birth traits differ within a breed (user: detail page, not breed page). build_data: species.learn + traitLearn.
+  Evo imports (user: look in the Evo extract): Evo has no level-up traits or techniques (bought with points, no breed
+  traits), so the 69 on an MR4 main use MR4's rules with their converted record (extract dec_trait_learning.py, dashed
+  boxes = proposal); the 24 Maya / Piroro monsters have no MR4 tables and no Learning side.
 
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide

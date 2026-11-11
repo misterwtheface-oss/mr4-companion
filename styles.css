@@ -222,3 +222,4 @@ main.table { padding-bottom: 0; }
 .lodds { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 8px; align-items: center; padding: 8px 10px; font-size: 13px; }
 .lodds > b { font-weight: 600; text-align: right; min-width: 4.5ch; }
 .bar.odds { --c: var(--gold); }
+.lprop .box { border-style: dashed; }
