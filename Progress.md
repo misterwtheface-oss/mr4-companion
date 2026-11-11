@@ -98,8 +98,9 @@
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.
 Backlog (user, 2026-11-08):
-- [ ] How traits work: decode res 0xF1 (kind + 4 x (effect, value)) and the battle / training consumers into plain
-      words per trait (extract 01_monster § 4.4, 03_battle).
+- [ ] How traits work: technique-changing traits are in the app (2026-11-10: body-part, Lores, Eagle Eyes); still open:
+      plain numbers for armour / battle / raising traits (Hi Counter, Lucky Star, Hi Recovery readers untraced; extract
+      MONSTER_DATA § Traits, 01_monster § 4.4, 03_battle).
 - [x] Technique panels drawn like the game's: layouts 20 / 21 rebuilt from their parts (State, 2026-11-08 game panels).
 - [x] Breed emblems inside the game's UI container: res 0x8B backdrop + Mon info name plate / breed row.
 - [x] Per-stat modifier: not shown (user 2026-11-08): always 2 x (grade - 5) on every shown breed, Growth says it all.
@@ -143,6 +144,10 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-10 [mr4.app] What changed and why: user-approved mockups shipped: monster page on tapping a monster (replaces
+  the tap cycle), main x sub Table view (Ape row, ? sub columns), an E..S Guts Cost letter (Life Damage scale, cheap = S)
+  and traits mapped to the techniques they change. Open after this session: user eye test on a phone (Back button,
+  table scrolling); armour / battle / raising trait numbers still undescribed.
 - 2026-11-10 [mr4.app] What changed and why: user asked for the technique section in the monster-box style; the Breed tab
   became Techniques, the pictogram selector went away for one gold box per technique (shared .box styles with monster rows),
   Added Effects moved into the left column, the monster type moved into each monster's name band, and the overlay body got
