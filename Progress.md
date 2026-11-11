@@ -156,6 +156,7 @@ Backlog (user, 2026-11-08):
       Ape's own face).
 
 ## Session log
+- 2026-11-10 [mr4.app] What changed and why: user asked for trait / technique learning: monster page Info | Learning toggle (expedition levels, guaranteed traits, random-trait odds; Evo imports on MR4 mains as proposals) and a difference-to-pure-breed marker on stats, grades, lifespan and resists.  Open after this session: phone eye test of both; Maya / Piroro monsters have no Learning side.
 - 2026-11-10 [mr4.app] What changed and why: user-approved mockups shipped: monster page on tapping a monster (replaces
   the tap cycle), main x sub Table view (Ape row, ? sub columns), an E..S Guts Cost letter (Life Damage scale, cheap = S)
   and traits mapped to the techniques they change. Open after this session: user eye test on a phone (Back button,
