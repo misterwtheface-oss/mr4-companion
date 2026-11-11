@@ -72,6 +72,11 @@
   each Evo breed's model file carries its 12 slot pictograms, MR4 art format; build_data evo_waza -> assets/icon/evo/waza/).
   Renders: look D + the 93 Evo imports re-rendered lit (task MR4_rerender_lit); app crop now keeps see-through parts and
   the shadow (crop_model = full visible outline).
+- 2026-11-10 (monster page, user-approved mockup): tapping a monster box opens its own page (URL #b/<breed>/m/<id>;
+  phone Back / the "‹ breed" title returns to the breed list at its scroll position) instead of the stats -> resists -> info
+  cycle (removed). Page = hero box (emblems | name, Evo tag, type; big render; Book description), then Stats, Resists,
+  Traits (one box each: name + the game's effect text; numeric trait effects still undecoded, backlog) and the full
+  Starting Techniques boxes (same techRow as the Techniques tab). Stats panel shared by rows and page (app.js stats()).
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.

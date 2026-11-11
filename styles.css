@@ -78,8 +78,8 @@ main { padding: 12px 10px; }
   transform: translate(-50%, -50%) rotate(45deg); }
 .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
 /* monster type at the right end of the name band */
-.mrow .box-hr .iv { margin-left: auto; padding-left: 8px; font-size: 12px; font-weight: 600; color: var(--steel); }
-.mrow .box-hr .badge { width: 20px; height: 20px; margin-right: 4px; }
+.mrow .box-hr .iv, .mp-hero .box-hr .iv { margin-left: auto; padding-left: 8px; font-size: 12px; font-weight: 600; color: var(--steel); }
+.mrow .box-hr .badge, .mp-hero .box-hr .badge { width: 20px; height: 20px; margin-right: 4px; }
 .mrow-pic { position: relative; overflow: hidden;   /* stats set the row height */
   /* lit stage behind the Cycles renders (key light, cast shadows, ground shadow) */
   background: radial-gradient(ellipse 80% 70% at 50% 38%, #6a707a, #474d57 55%, #2c3139 100%); }
@@ -109,25 +109,19 @@ main { padding: 12px 10px; }
 .mlife > b { font-weight: 600; }
 .mlife > .bar { flex: 1; --c: var(--gold); }
 .mlife > span { font-size: 12px; color: var(--steel); }
-/* tap a monster box: stats <-> resists (8 element affinities in two columns, then the 3 category resists) */
+/* monster box: a tap opens the monster page */
 .mrow { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .mrow:active .mrow-m { background: rgba(200, 165, 90, .05); }
-/* both panels share one grid cell, the hidden one keeps its space: the box keeps its height on every tap */
-.mrow-m { display: grid; }
-.mrow-m > * { grid-area: 1 / 1; }
-.mres, .mrow.res .mstats { visibility: hidden; }
-.mrow.res .mres { visibility: visible; }
-/* info face (description, trait, starting techniques): laid over the same cell, scrolls inside it, never sets the height */
-.mrow-m { position: relative; }
-.minfo { position: absolute; inset: 0; padding: 7px 10px 8px; overflow-y: auto; visibility: hidden; font-size: 13px; line-height: 1.35; }
-.mrow.info .minfo { visibility: visible; }
-.mrow.info .mstats { visibility: hidden; }
-.minfo p { margin: 0 0 6px; color: var(--steel); }
-.mi-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 10px;
-  font-size: 12px; white-space: nowrap; }
-.chip.trait { border-color: var(--gold); color: var(--gold-hi); }
-.chip .waza { width: 27px; height: 18px; display: inline-block; }
+/* monster page (#b/<breed>/m/<id>): hero box (emblems | name over a big render and the Book description), then Stats,
+   Resists, Traits (game text) and the full Starting Techniques boxes */
+.mp-back { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+.mp-back::before { content: '\2039'; font-size: 24px; line-height: 1; }
+.mp-hero { grid-template-rows: auto auto auto; }
+.mp-pic { grid-column: 1 / -1; height: 230px; border-bottom: 1px solid var(--gold); }
+.mp-desc { grid-column: 1 / -1; margin: 0; padding: 8px 10px 10px; font-size: 13px; line-height: 1.4; color: var(--steel); }
+.mp-h { margin: 16px 2px 6px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.mp-one { grid-template-columns: 1fr; }
+.mp-trait p { margin: 0; padding: 7px 10px 9px; font-size: 13px; line-height: 1.4; }
 /* Evo imports: origin tag; grades that are a proposal (no source value) get a dashed outline */
 .box-hr .evo { margin-left: 6px; padding: 0 5px; border: 1px solid var(--steel); border-radius: 4px; font-size: 10px;
   font-weight: 600; letter-spacing: .06em; color: var(--steel); }

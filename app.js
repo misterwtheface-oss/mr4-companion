@@ -96,22 +96,18 @@
   const resists = (s) => `<div class="mres"><div class="rgrid">` +
     s.resist.el.map((v, i) => resCell(ELEM[i + 1].icon, ELEM[i + 1].name, v, 'e' + i, `el-${i + 1}`)).join('') +
     `</div><div class="rgrid rcat">${s.resist.cat.map((v, i) => resCell(CAT[i + 1].icon, '', v, 'c' + i, 'cat')).join('')}</div></div>`;
-  // third face of a monster box: Book description, starting trait(s), starting techniques
-  const info = (s) => `<div class="minfo">` +
-    (s.desc ? `<p>${esc(s.desc)}</p>` : '') +
-    `<div class="mi-row">${s.traits.map((t) => `<span class="chip trait" title="${esc(TR[t]?.desc)}">${esc(TR[t]?.name)}</span>`).join('')}</div>` +
-    `<div class="mi-row">${s.startTechs.map((t) => `<span class="chip">${ico(TECH[t]?.icon, 'waza')}${esc(TECH[t]?.name)}</span>`).join('')}</div></div>`;
-  const FACE_CLS = ['', ' res', ' info'];
-  const monRow = (s) =>
-    // one box: header band (emblems | name, monster type at the right) over the body (render | stats + lifespan bar with the growth type; a tap on
-    // the box swaps the stats for the resists)
-    `<div class="box mrow${FACE_CLS[open.face[s.id] || 0]}" data-mon="${s.id}"><div class="box-hl">${pair(s)}</div><b class="box-hr"><span class="tt bname">${esc(s.name)}</span>${isEvo(s) ? '<span class="evo">Evo</span>' : ''}${typeBadge(s)}</b>` +
-    `<div class="box-l mrow-pic">${monImg(s)}</div><div class="mrow-m"><div class="mstats">` +
+  // stats panel (monster rows and the monster page): per stat label, base, bar, growth grade, gain %; then lifespan + growth type
+  const stats = (s) => `<div class="mstats">` +
     STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
       `<span class="g g${s.grade[x]}${s.src?.grade === 'proposal' ? ' prop' : ''}">${s.grade[x]}</span>` +
       `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
     `<div class="mlife"><i>Lifespan</i><b>${s.lifespan}</b>${magBar(s.lifespan, statMax.lifespan, 'life')}` +
-    `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div>${resists(s)}${info(s)}</div></div>`;
+    `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div>`;
+  const nameBand = (s) => `<b class="box-hr"><span class="tt bname">${esc(s.name)}</span>${isEvo(s) ? '<span class="evo">Evo</span>' : ''}${typeBadge(s)}</b>`;
+  // one box: header band (emblems | name, monster type at the right) over the body (render | stats); a tap opens the monster page
+  const monRow = (s) =>
+    `<div class="box mrow" data-mon="${s.id}"><div class="box-hl">${pair(s)}</div>${nameBand(s)}` +
+    `<div class="box-l mrow-pic">${monImg(s)}</div><div class="mrow-m">${stats(s)}</div></div>`;
 
   // techniques: one box per technique, in slot order
   const RANGE_C = ['#f47468', '#f47468', '#f4dc64', '#f4dc64', '#78ec80', '#78ec80', '#78ec80', '#78ec80', '#78ec80'];
@@ -135,6 +131,19 @@
         `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div></div>`;
   };
 
+  // monster page (#b/<breed>/m/<id>, user 2026-11-10): hero box (emblems | name, big render, Book description), then
+  // Stats, Resists, Traits (the game's effect text) and the full Starting Techniques boxes
+  const sec = (title, body) => `<h3 class="mp-h">${title}</h3>${body}`;
+  const monPage = (s) =>
+    `<div class="box mp-hero"><div class="box-hl">${pair(s)}</div>${nameBand(s)}` +
+    `<div class="mp-pic mrow-pic">${monImg(s)}</div>${s.desc ? `<p class="mp-desc">${esc(s.desc)}</p>` : ''}</div>` +
+    sec('Stats', `<div class="box mp-one"><div class="mrow-m">${stats(s)}</div></div>`) +
+    sec('Resists', `<div class="box mp-one"><div class="mrow-m">${resists(s)}</div></div>`) +
+    (s.traits.length ? sec('Traits', `<div class="mlist">${s.traits.map((t) =>
+      `<div class="box mp-one mp-trait"><div class="box-h"><span class="tt bname">${esc(TR[t]?.name)}</span></div>` +
+      `<p>${esc(TR[t]?.desc)}</p></div>`).join('')}</div>`) : '') +
+    (s.startTechs.length ? sec('Starting Techniques', `<div class="mlist">${s.startTechs.map((t) => techRow(TECH[t])).join('')}</div>`) : '');
+
   const BREED_VIEWS = {
     mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map(monRow).join('')}</div>` },
     techs: {
@@ -146,10 +155,19 @@
     },
   };
 
-  const open = { breed: null, scroll: {}, face: {} };   // face per monster: 0 stats, 1 resists, 2 info
+  const open = { breed: null, mon: null, scroll: {} };
   function showBreed() {
     const k = open.breed;
     if (k == null) { $('#overlay').hidden = true; document.body.style.overflow = ''; return; }
+    if (open.mon != null) {   // monster page: title = back to the breed, opens at the top
+      $('#sheet-title').innerHTML = `<button class="mp-back" data-act="back">${esc(breedName(k))}</button>`;
+      $('#seg').innerHTML = '';
+      $('#sheet-body').innerHTML = monPage(open.mon);
+      $('#sheet-body').scrollTop = 0;
+      $('#overlay').hidden = false;
+      document.body.style.overflow = 'hidden';
+      return;
+    }
     const views = k === SPECIAL ? ['mons'] : Object.keys(BREED_VIEWS);
     const v = views.includes(st.view) ? st.view : 'mons';
     $('#sheet-title').textContent = breedName(k);
@@ -161,31 +179,32 @@
     document.body.style.overflow = 'hidden';
   }
 
-  // ---- routing: #b/<breed> so the phone's Back button closes the overlay ----
-  let pushed = false;
+  // ---- routing: #b/<breed>[/m/<monster>] so the phone's Back button steps back (monster page -> breed -> main page) ----
+  let depth = 0;   // history entries this app pushed (0..2)
   function route() {
-    const m = location.hash.match(/^#b\/(\d+|x|ape)$/);
-    if (open.breed != null) open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;
+    const m = location.hash.match(/^#b\/(\d+|x|ape)(?:\/m\/(\d+))?$/);
+    if (open.breed != null && open.mon == null) open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;
     const g = m && m[1];
     open.breed = g === APE && members[APE] ? APE : g === SPECIAL && FEATURES.bosses ? SPECIAL : g && BR[g] ? +g : null;
-    if (open.breed == null) pushed = false;
+    open.mon = (open.breed != null && m[2] && members[open.breed].find((s) => s.id === +m[2])) || null;
+    depth = Math.min(depth, open.mon ? 2 : open.breed != null ? 1 : 0);
     showBreed();
   }
-  const close = () => {
-    if (pushed) return history.back();   // hashchange -> route()
-    history.replaceState(null, '', location.pathname + location.search);
+  const go = (hash) => {   // to a shallower level: Back through our own entries, else replace
+    const up = depth - (hash ? (hash.includes('/m/') ? 2 : 1) : 0);
+    if (up > 0 && depth >= up) return history.go(-up);   // hashchange -> route()
+    history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
     route();
   };
+  const close = () => go('');
+  const back = () => go('b/' + open.breed);
 
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-breed]');
-    if (b) { pushed = true; location.hash = 'b/' + b.dataset.breed; return; }
+    if (b) { depth = 1; location.hash = 'b/' + b.dataset.breed; return; }
     const mr = e.target.closest('[data-mon]');
-    if (mr) {   // stats -> resists -> info in place (no re-render: keeps the scroll position)
-      const id = +mr.dataset.mon, f = ((open.face[id] || 0) + 1) % 3;
-      open.face[id] = f;
-      mr.classList.toggle('res', f === 1); mr.classList.toggle('info', f === 2); return;
-    }
+    if (mr) { depth++; location.hash = `b/${open.breed}/m/${mr.dataset.mon}`; return; }
+    if (e.target.closest('[data-act="back"]')) return back();
     const v = e.target.closest('[data-view]');
     if (v) {
       open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;
@@ -193,7 +212,7 @@
     }
     if (e.target.closest('[data-act="close"]') || e.target.id === 'overlay') close();
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open.breed != null) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open.breed != null) (open.mon ? back() : close()); });
   window.addEventListener('hashchange', route);
 
   renderHome();
