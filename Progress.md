@@ -88,6 +88,12 @@
   scales step ~7 points, Accuracy squeezed), read inverted (user: cheap = S, costly moves get a poor letter):
   >= 49 E, 38-48 D, 30-37 C, 22-29 B, 15-21 A, < 15 S; over the 360 MR4 core techniques S..E = 34/59/78/76/70/43.
   build_data.py GUTS_CUTS + tech_ranks() -> rank.guts; the bar stays magnitude (longer = costlier).
+- 2026-11-10 (traits -> techniques, user): data gains technique.part (MONSKILL sub-category 1..18) and trait boosts
+  (build_data trait_boost from extract traits.json: body-part traits part + pts, Lores el {element: signed pts}, Eagle
+  Eyes all). Trait box = game text + one plain note line (e.g. "Fire +3, Ice +1, Wind -3 (+1% hit, +4% Life Damage and
+  +2% Guts Damage per point)") + a collapsed "Techniques (n)" list of the breed's techniques it changes (signed, red =
+  weakened). Every technique box gets a "Boosted by" strip (body-part trait, base Lores with their "+" value; raisers
+  only); on a monster page the monster's own traits are outlined. Hi Counter -> Counter stays out (group skills hidden).
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.

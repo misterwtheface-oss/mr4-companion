@@ -142,7 +142,23 @@
     ['sharpness', 'Critical Hit Rate', 'r-crit'], ['hit', 'Accuracy Rate', 'r-acc']];
   // techniques shown = the shown groups' sets (Ape shares Garu's numbers)
   const rateMax = magMax(shownGroups.filter((k) => k !== APE).flatMap((k) => techsOf(k)), ['guts', ...RATES.map(([k]) => k)], (t, k) => t[k]);
-  const techRow = (t) => {
+  // traits -> techniques (build_data trait_boost, from the game's trait records): body-part traits +pts to techniques of
+  // that body part; Lores signed points per element; Eagle Eyes every technique
+  const PART_NAME = ['', 'Fang', 'Claw', 'Fist', 'Wing', 'Weapon', 'Voice', 'Breath', 'Tail', 'Tongue', 'Foot', 'Horn', 'Head',
+    'Charm', 'Throw / shoot', 'Hip', '', '', 'Beam'];
+  const PART_TRAIT = Object.fromEntries(D.traits.filter((x) => x.part).map((x) => [x.part, x]));
+  const plusOf = (x) => D.traits.find((y) => y.el && y.name.replace(/\s/g, '') === x.name.replace(/\s/g, '') + '+');
+  const boost = (tr, t) => (tr.part ? (t.part === tr.part ? tr.pts : 0) : tr.el ? tr.el[t.element] || 0 : 0);
+  // traits that raise a technique: its body-part trait, then the base Lores giving its element plus points ("+" value beside)
+  const boostStrip = (t, own = []) => {
+    const b = [PART_TRAIT[t.part], ...D.traits.filter((x) => x.el && !x.name.endsWith('+'))]
+      .filter((x) => x && boost(x, t) > 0).sort((x, y) => boost(y, t) - boost(x, t));
+    return b.length ? `<div class="tc-b"><i>Boosted by</i>${b.map((x) => {
+      const p = x.el && plusOf(x), mine = own.includes(x.id) || (p && own.includes(p.id));
+      return `<span class="chip${mine ? ' own' : ''}">${esc(x.name)} <b>+${boost(x, t)}${p ? ` / +${boost(p, t)}` : ''}</b></span>`;
+    }).join('')}</div>` : '';
+  };
+  const techRow = (t, own) => {
     const e = ELEM[t.element], c = CAT[t.category];
     const type = t.type === 0 ? `<span class="tt t-pow">${esc(TX.pow)}</span>` : t.type === 1 ? `<span class="tt t-int">${esc(TX.int)}</span>` : '';
     const range = t.range != null ? `<span class="tt" style="--c1:${RANGE_C[t.range]};--c2:${RANGE_C[t.range + 1]}">${esc(D.meta.ranges[t.range])}</span>` : '';
@@ -154,12 +170,24 @@
       // guts cost: own bar; the game has no letter for it, ours is built in build_data.py (GUTS_CUTS, cheap = S)
       `<div class="tc-r"><div class="rates"><i class="r-cost">Guts Cost</i>${magBar(t.guts, rateMax.guts, 'r-cost')}<b>${t.guts}</b><img src="${RANK_IMG['EDCBAS'[t.rank.guts]]}" alt="${'EDCBAS'[t.rank.guts]}">${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
         magBar(t[k], rateMax[k], cls) +
-        `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div></div>`;
+        `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div>${boostStrip(t, own)}</div>`;
   };
 
   // monster page (#b/<breed>/m/<id>, user 2026-11-10): hero box (emblems | name, big render, Book description), then
   // Stats, Resists, Traits (the game's effect text) and the full Starting Techniques boxes
   const sec = (title, body) => `<h3 class="mp-h">${title}</h3>${body}`;
+  const signedPts = (v) => (v > 0 ? `+${v}` : `−${-v}`);
+  // plain numbers under the game's text (user 2026-11-10: one line, no table)
+  const traitNote = (tr) => tr.part ? `${PART_NAME[tr.part]} techniques ${signedPts(tr.pts)} (+1% hit, +2% Life Damage and +2% Guts Damage per point).`
+    : tr.el ? `${Object.entries(tr.el).sort((a, b) => b[1] - a[1]).map(([e, v]) => `${ELEM[e].name} ${signedPts(v)}`).join(', ')} (+1% hit, +4% Life Damage and +2% Guts Damage per point).`
+    : tr.all ? `Every technique: Accuracy ×${tr.all.hit / 100}, Life Damage ×${tr.all.damage / 100}.` : '';
+  // the breed's techniques the trait changes, collapsed by default (native details: no re-render)
+  const traitTechs = (tr, k) => {
+    if (!tr.part && !tr.el) return '';
+    const l = techsOf(k).filter((t) => boost(tr, t)).sort((a, b) => boost(tr, b) - boost(tr, a) || a.slot - b.slot);
+    return l.length ? `<details class="tr-t"><summary>Techniques (${l.length})</summary><div>${l.map((t) =>
+      `<span class="chip${boost(tr, t) < 0 ? ' neg' : ''}">${ico(t.icon, 'waza')}${esc(t.name)} <b>${signedPts(boost(tr, t))}</b></span>`).join('')}</div></details>` : '';
+  };
   const monPage = (s) =>
     `<div class="box mp-hero"><div class="box-hl">${pair(s)}</div>${nameBand(s)}` +
     `<div class="mp-pic mrow-pic">${monImg(s)}</div>${s.desc ? `<p class="mp-desc">${esc(s.desc)}</p>` : ''}</div>` +
@@ -167,8 +195,8 @@
     sec('Resists', `<div class="box mp-one"><div class="mrow-m">${resists(s)}</div></div>`) +
     (s.traits.length ? sec('Traits', `<div class="mlist">${s.traits.map((t) =>
       `<div class="box mp-one mp-trait"><div class="box-h"><span class="tt bname">${esc(TR[t]?.name)}</span></div>` +
-      `<p>${esc(TR[t]?.desc)}</p></div>`).join('')}</div>`) : '') +
-    (s.startTechs.length ? sec('Starting Techniques', `<div class="mlist">${s.startTechs.map((t) => techRow(TECH[t])).join('')}</div>`) : '');
+      `<p>${esc(TR[t]?.desc)}${traitNote(TR[t]) ? `<span class="tr-n">${esc(traitNote(TR[t]))}</span>` : ''}</p>${traitTechs(TR[t], groupOf(s))}</div>`).join('')}</div>`) : '') +
+    (s.startTechs.length ? sec('Starting Techniques', `<div class="mlist">${s.startTechs.map((t) => techRow(TECH[t], s.traits)).join('')}</div>`) : '');
 
   const BREED_VIEWS = {
     mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map(monRow).join('')}</div>` },
@@ -176,7 +204,7 @@
       label: 'Techniques',
       // one box per technique
       body(k) {
-        return `<div class="mlist">${techsOf(k).map(techRow).join('')}</div>`;
+        return `<div class="mlist">${techsOf(k).map((t) => techRow(t)).join('')}</div>`;
       },
     },
   };

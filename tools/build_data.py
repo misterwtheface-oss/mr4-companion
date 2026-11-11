@@ -111,6 +111,19 @@ def main():
     errors.extend("icon_map: " + e for e in im_map["errors"])
     sk = {(r["genus"], r["slot"]): r for r in
           json.load(open(os.path.join(X, "data", "battle", "techniques.json"), encoding="utf-8"))["records"]}
+    # which techniques a trait boosts (res 0xF1 trait records, extract data/monster/traits.json, MONSTER_DATA.md § Traits):
+    # body-part traits (kind 1, effect 0x1B + part, +3) -> techniques of that body part; Lores (kind 3, effects 20..27 =
+    # affinity to element 1..8) -> techniques of those elements, signed points; Eagle Eyes (effects 49 hit x120 %, 52 / 54
+    # POW / INT damage x90 %) -> every technique
+    trait_boost = {}
+    for tr in json.load(open(os.path.join(X, "data", "monster", "traits.json"), encoding="utf-8"))["records"]:
+        eff = [(c, v) for c, v in tr["effects"] if c]
+        if tr["kind"] == 1 and len(eff) == 1 and 0x1C <= eff[0][0] <= 0x2D:
+            trait_boost[tr["index"]] = {"part": eff[0][0] - 0x1B, "pts": eff[0][1]}
+        elif tr["kind"] == 3 and eff and all(20 <= c <= 27 for c, _ in eff):
+            trait_boost[tr["index"]] = {"el": {c - 19: v for c, v in eff}}
+        elif sorted(c for c, _ in eff) == [49, 52, 54]:
+            trait_boost[tr["index"]] = {"all": {"hit": dict(eff)[49], "damage": dict(eff)[52]}}
     sp_raw = json.load(open(os.path.join(X, "data", "monster", "species.json"), encoding="utf-8"))
     sp_rows = sp_raw if isinstance(sp_raw, list) else sp_raw["records"]
     sp_rows = sp_rows + [dict(e["record"], index=e["mr4_index"]) for e in
@@ -287,7 +300,7 @@ def main():
                                                   "damage", "withering", "heal", "followup", "element", "category")} |
                               {"range": t["range"] if t["range"] in ranges else None,
                                "effect": msg_db.get(0xAF + t["effect"]) if 0 <= t["effect"] < 0x22 else None,
-                               "rank": tech_ranks(t), "nameApe": None,
+                               "rank": tech_ranks(t), "nameApe": None, "part": None,
                                "icon": evo_waza(t), "iconApe": None, "origin": "evo"})
             continue
         r = sk.get((t["genus"], t["slot"]))
@@ -301,6 +314,8 @@ def main():
                            # Mon info detail (FUN_0011c998): "Added Effects" = msg 0xDB[0xAF + effect_code] (< 0x22)
                            "effect": msg_db.get(0xAF + r["effect_code"]) if 0 <= r.get("effect_code", -1) < 0x22 else None,
                            "rank": tech_ranks(t),
+                           # body part (MONSKILL +0x0D sub-category 1..18, 0 = none; extract dec_battle.py): matching trait boosts it
+                           "part": max(r.get("subcategory", 0), 0),
                            "nameApe": msg_e3.get(0x22A + t["slot"]) if t["genus"] == 0x1A else None,
                            "icon": icon(ti["icon"]) if ti.get("icon") else None,
                            "iconApe": icon(ti["icon_ape"]) if ti.get("icon_ape") else None})
@@ -347,7 +362,7 @@ def main():
         "breeds": breeds,
         "species": species,
         "techniques": techniques,
-        "traits": [{k: t[k] for k in ("id", "name", "desc")} for t in d["traits"]],
+        "traits": [{k: t[k] for k in ("id", "name", "desc")} | trait_boost.get(t["id"], {}) for t in d["traits"]],
         "items": items,
         "tournaments": [{k: t[k] for k in ("id", "name", "rank", "format", "entrants", "official", "monstersNeeded",
                                            "prizeMoney", "prizeItem", "opponents")} for t in tournaments],
