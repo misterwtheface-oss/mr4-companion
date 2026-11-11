@@ -223,3 +223,6 @@ main.table { padding-bottom: 0; }
 .lodds > b { font-weight: 600; text-align: right; min-width: 4.5ch; }
 .bar.odds { --c: var(--gold); }
 .lprop .box { border-style: dashed; }
+/* difference to the pure breed (monster page) */
+.dv { margin-left: 2px; font-size: 10px; font-weight: 600; vertical-align: super; line-height: 0; }
+.dv.up { color: var(--gold-hi); } .dv.dn { color: var(--bad); }

@@ -118,16 +118,20 @@
   // scale per element / category over the shown monsters
   const resMax = magMax(shownGroups.flatMap((k) => members[k]), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'c0', 'c1', 'c2'],
     (s, x) => s.resist[x[0] === 'e' ? 'el' : 'cat'][+x[1]]);
-  const resCell = (src, title, v, key, cls) => `${ico(src, 'ico', title)}<b>${signed(v)}</b>${magBar(v, resMax[key], cls)}`;
-  const resists = (s) => `<div class="mres"><div class="rgrid">` +
-    s.resist.el.map((v, i) => resCell(ELEM[i + 1].icon, ELEM[i + 1].name, v, 'e' + i, `el-${i + 1}`)).join('') +
-    `</div><div class="rgrid rcat">${s.resist.cat.map((v, i) => resCell(CAT[i + 1].icon, '', v, 'c' + i, 'cat')).join('')}</div></div>`;
+  // difference to the pure breed of the same main (monster page, user 2026-11-10): a small signed number after the value,
+  // only where they differ; r = null (pure breeds, specials) shows nothing
+  const pureOf = (s) => (s.main == null || s.sub === s.main ? null : D.species.find((x) => x.main === s.main && x.sub === s.main) || null);
+  const dv = (v, r) => (r == null || v === r ? '' : `<sup class="dv ${v > r ? 'up' : 'dn'}">${signed(v - r)}</sup>`);
+  const resCell = (src, title, v, key, cls, r) => `${ico(src, 'ico', title)}<b>${signed(v)}${dv(v, r)}</b>${magBar(v, resMax[key], cls)}`;
+  const resists = (s, p) => `<div class="mres"><div class="rgrid">` +
+    s.resist.el.map((v, i) => resCell(ELEM[i + 1].icon, ELEM[i + 1].name, v, 'e' + i, `el-${i + 1}`, p?.resist.el[i])).join('') +
+    `</div><div class="rgrid rcat">${s.resist.cat.map((v, i) => resCell(CAT[i + 1].icon, '', v, 'c' + i, 'cat', p?.resist.cat[i])).join('')}</div></div>`;
   // stats panel (monster rows and the monster page): per stat label, base, bar, growth grade, gain %; then lifespan + growth type
-  const stats = (s) => `<div class="mstats">` +
-    STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
-      `<span class="g g${s.grade[x]}${s.src?.grade === 'proposal' ? ' prop' : ''}">${s.grade[x]}</span>` +
+  const stats = (s, p) => `<div class="mstats">` +
+    STATS.map((x) => `<i class="s-${x}">${x}</i><b>${s.base[x]}${dv(s.base[x], p?.base[x])}</b>${magBar(s.base[x], statMax[x], `s-${x}`)}` +
+      `<span class="g g${s.grade[x]}${s.src?.grade === 'proposal' ? ' prop' : ''}">${s.grade[x]}${dv(s.grade[x], p?.grade[x])}</span>` +
       `<span class="gp${s.growthPct[x] > 0 ? ' up' : s.growthPct[x] < 0 ? ' dn' : ''}">${signed(s.growthPct[x])}%</span>`).join('') +
-    `<div class="mlife"><i>Lifespan</i><b>${s.lifespan}</b>${magBar(s.lifespan, statMax.lifespan, 'life')}` +
+    `<div class="mlife"><i>Lifespan</i><b>${s.lifespan}${dv(s.lifespan, p?.lifespan)}</b>${magBar(s.lifespan, statMax.lifespan, 'life')}` +
     `<span>${GROWTH_TYPE[s.growthType] ?? s.growthType}</span></div></div>`;
   const nameBand = (s) => `<b class="box-hr"><span class="tt bname">${esc(s.name)}</span>${isEvo(s) ? '<span class="evo">Evo</span>' : ''}${typeBadge(s)}</b>`;
   // one box: header band (emblems | name, monster type at the right) over the body (render | stats); a tap opens the monster page
@@ -191,8 +195,8 @@
   const monPage = (s) =>
     `<div class="box mp-hero"><div class="box-hl">${pair(s)}</div>${nameBand(s)}` +
     `<div class="mp-pic mrow-pic">${monImg(s)}</div>${s.desc ? `<p class="mp-desc">${esc(s.desc)}</p>` : ''}</div>` +
-    sec('Stats', `<div class="box mp-one"><div class="mrow-m">${stats(s)}</div></div>`) +
-    sec('Resists', `<div class="box mp-one"><div class="mrow-m">${resists(s)}</div></div>`) +
+    sec('Stats', `<div class="box mp-one"><div class="mrow-m">${stats(s, pureOf(s))}</div></div>`) +
+    sec('Resists', `<div class="box mp-one"><div class="mrow-m">${resists(s, pureOf(s))}</div></div>`) +
     (s.traits.length ? sec('Traits', `<div class="mlist">${s.traits.map((t) =>
       `<div class="box mp-one mp-trait"><div class="box-h"><span class="tt bname">${esc(TR[t]?.name)}</span></div>` +
       `<p>${esc(TR[t]?.desc)}${traitNote(TR[t]) ? `<span class="tr-n">${esc(traitNote(TR[t]))}</span>` : ''}</p>${traitTechs(TR[t], groupOf(s))}</div>`).join('')}</div>`) : '') +
