@@ -102,6 +102,9 @@
   Evo imports (user: look in the Evo extract): Evo has no level-up traits or techniques (bought with points, no breed
   traits), so the 69 on an MR4 main use MR4's rules with their converted record (extract dec_trait_learning.py, dashed
   boxes = proposal); the 24 Maya / Piroro monsters have no MR4 tables and no Learning side.
+- 2026-11-10 (pure-breed difference, user): monster page Stats / Resists show a small signed difference to the pure
+  breed of the same main (stat, grade, lifespan, each resist; pureOf + dv in app.js). Evo starting traits: user decisions
+  come from the extract (evo_records.py USER_TRAITS), the rest are proposals.
 
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
