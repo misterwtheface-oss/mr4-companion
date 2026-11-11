@@ -124,6 +124,26 @@ def main():
             trait_boost[tr["index"]] = {"el": {c - 19: v for c, v in eff}}
         elif sorted(c for c, _ in eff) == [49, 52, 54]:
             trait_boost[tr["index"]] = {"all": {"hit": dict(eff)[49], "damage": dict(eff)[52]}}
+    # trait learning (extract data/monster/trait_learning.json, 01_monster.md § 4.8): each expedition level 2..20 gives the
+    # main breed's fixed Ride / Search trait if it has one for that level, else one weighted pick from the level band's
+    # table (P = weight / (sum + 1), nothing = 1 / (sum + 1)); per species the pool it can draw from as born (armour only
+    # if the species lists it, body part only if the breed has techniques of it, owned traits out)
+    tl = json.load(open(os.path.join(X, "data", "monster", "trait_learning.json"), encoding="utf-8"))
+    tl_bands = []
+    for name, rows in tl["band_tables"].items():
+        lo, hi = map(int, re.match(r"levels (\d+)-(\d+)$", name).groups())
+        tl_bands.append({"from": lo, "to": hi, "w": {r["id"]: r["weight"] for r in rows}})
+    tl_fixed = {int(re.search(r"main (\d+)", k).group(1)): [[e["level"], e["id"]] for e in v]
+                for k, v in tl["special_by_main"].items()}
+    # techniques by expedition level (`Adv_TryLearnArts` 0x1b8558 -> `Adv_TblArts` 0x1b9d78: res 0xBE adv_arts, row =
+    # level - 1 (col 0 holds the level), col = main breed + 1, value = technique slot of the main breed's set; taught
+    # only if not known yet, `Mon_TechNotLearned` 0x28af30); exp = res 0xC6 adv_mon_level, cumulative exp per level
+    adv = json.load(open(os.path.join(X, "data", "adventure", "adv_params.json"), encoding="utf-8"))
+    tl_arts = {m: [[r[0], r[m + 1]] for r in adv["adv_arts"]["data"] if r[m + 1] >= 0]
+               for m in range(adv["adv_arts"]["cols"] - 1)}
+    tl_exp = [r[0] for r in adv["adv_mon_level"]["data"]]
+    tl_pool = {s["species"]: [[t[0] for t in s["random_pool_fresh"][f"levels {b['from']}-{b['to']}"]["traits"]]
+                              for b in tl_bands] for s in tl["species"]}
     sp_raw = json.load(open(os.path.join(X, "data", "monster", "species.json"), encoding="utf-8"))
     sp_rows = sp_raw if isinstance(sp_raw, list) else sp_raw["records"]
     sp_rows = sp_rows + [dict(e["record"], index=e["mr4_index"]) for e in
@@ -245,6 +265,9 @@ def main():
             for i in ids or []:
                 if i not in pool:
                     errors.append(f"species {sid}: {k} id {i} not found")
+        for i in (i for band in tl_pool.get(sid, []) for i in band):
+            if i not in trait_ids:
+                errors.append(f"species {sid}: learnable trait id {i} not found")
         b = book.get(sid)
         species.append({k: s[k] for k in ("id", "name", "main", "sub", "base", "grade", "growthMod", "growthType",
                                           "lifespan", "traits", "favItems", "startTechs", "desc", "origin")} |
@@ -253,7 +276,7 @@ def main():
                        {"img": img, "type": sp_type.get(sid), "resist": sp_resist.get(sid), "growthPct": growth_pct(s), "book": b["routes"] if b else None,
                         "pic": [ver(f"assets/mon/{sid}.webp"), ver(f"assets/mon/s/{sid}.webp")] if img.startswith("render:") else None,
                         "faces": faces(s["main"] if s["main"] is not None else sp_special.get(sid, 0x26), s["sub"]),
-                        "disc": b["discObtainable"] if b else None})
+                        "disc": b["discObtainable"] if b else None, "learn": tl_pool.get(sid)})
 
     def evo_face(main):   # an Evo main's emblem = Evo's own (disc + ring baked in; extract _mrevo tools/evo_emblems.py)
         name = evo_mains[main]["name"]
@@ -363,6 +386,7 @@ def main():
         "species": species,
         "techniques": techniques,
         "traits": [{k: t[k] for k in ("id", "name", "desc")} | trait_boost.get(t["id"], {}) for t in d["traits"]],
+        "traitLearn": {"bands": tl_bands, "fixed": tl_fixed, "arts": tl_arts, "exp": tl_exp},
         "items": items,
         "tournaments": [{k: t[k] for k in ("id", "name", "rank", "format", "entrants", "official", "monstersNeeded",
                                            "prizeMoney", "prizeItem", "opponents")} for t in tournaments],

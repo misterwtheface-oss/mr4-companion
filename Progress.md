@@ -94,6 +94,12 @@
   +2% Guts Damage per point)") + a collapsed "Techniques (n)" list of the breed's techniques it changes (signed, red =
   weakened). Every technique box gets a "Boosted by" strip (body-part trait, base Lores with their "+" value; raisers
   only); on a monster page the monster's own traits are outlined. Hi Counter -> Counter stays out (group skills hidden).
+- 2026-11-10 (learning, user): monster page gets an Info | Learning toggle (only monsters with game data; st.mview). Learning =
+  Birth (starting techniques + traits), Expedition levels (level, cumulative exp, technique taught = res 0xBE adv_arts slot
+  of the main breed if not known, fixed Ride / Search trait if not owned) and one odds box per random band (weight /
+  (sum + 1), Nothing = 1 / (sum + 1), species pool as born; odds shift as traits are gained). Per monster because armour
+  and birth traits differ within a breed (user: detail page, not breed page). build_data: species.learn + traitLearn.
+
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.
@@ -110,7 +116,7 @@ Backlog (user, 2026-11-08):
       User 2026-11-09: wants ALL food data + likes / dislikes, Book descriptions, trait learning. Extract side DONE
       2026-11-09, not yet in data.js / the app: Book descriptions (data/monster/book_desc.json, 335; specials have none;
       tools/dec_book.py), Library topics (6 breed topics in breed_lore.json, all 40 in data/core/library_topics.json),
-      trait learning (data/monster/trait_learning.json: expedition levels only; fixed Ride/Search trait per main breed
+      trait learning (IN THE APP 2026-11-10: monster page Learning side; data/monster/trait_learning.json: expedition levels only; fixed Ride/Search trait per main breed
       at a set level, else weighted random pools by level band; 01_monster.md § 4.8), food + likes + personality
       names / odds (data/monster/food.json, likes.json; tools/dec_advisor.py). All code-cited, nothing checked in play.
 - [ ] Raising advisor module (user 2026-11-09): per monster, what to feed and when, when to rest, when to praise vs

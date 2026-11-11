@@ -40,8 +40,8 @@
 
   // ---- state (localStorage mr4c.state) ----
   const KEY = 'mr4c.state';
-  const st = Object.assign({ view: 'mons', home: 'breeds' }, JSON.parse(localStorage.getItem(KEY) || '{}'));
-  const save = () => localStorage.setItem(KEY, JSON.stringify({ view: st.view, home: st.home }));
+  const st = Object.assign({ view: 'mons', home: 'breeds', mview: 'info' }, JSON.parse(localStorage.getItem(KEY) || '{}'));
+  const save = () => localStorage.setItem(KEY, JSON.stringify({ view: st.view, home: st.home, mview: st.mview }));
 
   // ---- shared pieces ----
   const monImg = (s, small) => s?.img.startsWith('render:')
@@ -198,6 +198,40 @@
       `<p>${esc(TR[t]?.desc)}${traitNote(TR[t]) ? `<span class="tr-n">${esc(traitNote(TR[t]))}</span>` : ''}</p>${traitTechs(TR[t], groupOf(s))}</div>`).join('')}</div>`) : '') +
     (s.startTechs.length ? sec('Starting Techniques', `<div class="mlist">${s.startTechs.map((t) => techRow(TECH[t], s.traits)).join('')}</div>`) : '');
 
+  // monster page, Learning side (user 2026-11-10): what each expedition level 2..20 brings (extract trait_learning.json,
+  // 01_monster.md § 4.8, 06_adventure § 4). Techniques: the main breed's adv_arts slot for that level, if not known yet.
+  // Traits: the main breed's fixed Ride / Search trait if not owned, else one weighted pick from the level's band over the
+  // species' pool as born (weight / (sum + 1); 1 / (sum + 1) = nothing). Odds differ per species (armour, birth traits)
+  const TL = D.traitLearn;
+  const lvRanges = (l) => l.reduce((a, v) => (a.length && a[a.length - 1][1] === v - 1 ? (a[a.length - 1][1] = v) : a.push([v, v]), a), [])
+    .map(([a, b]) => (a === b ? `${a}` : `${a}–${b}`)).join(', ');
+  const pct = (p) => `${(100 * p).toFixed(p < 0.1 ? 1 : 0)}%`;
+  const trChip = (id) => `<span class="chip">${esc(TR[id]?.name)}</span>`;
+  const learnPage = (s) => {
+    const k = groupOf(s), techs = techsOf(k);
+    const arts = Object.fromEntries((TL.arts[s.main] || []).map(([lv, slot]) => [lv, techs.find((t) => t.slot === slot)])
+      .filter(([, t]) => t && !s.startTechs.includes(t.id)));
+    const fixed = Object.fromEntries((TL.fixed[s.main] || []).filter(([, id]) => !s.traits.includes(id)));
+    const rows = [];
+    for (let lv = 2; lv <= 20; lv++) {
+      const t = arts[lv], f = fixed[lv];
+      if (t || f) rows.push(`<i>Lv ${lv}</i><span class="lr-x">${TL.exp[lv - 1].toLocaleString()}</span>` +
+        `<span>${t ? `<span class="chip">${ico(t.icon, 'waza')}${esc(t.name)}</span>` : ''}${f ? trChip(f) : ''}</span>`);
+    }
+    const draws = TL.bands.map((b, i) => {
+      const lv = []; for (let x = b.from; x <= b.to; x++) if (!fixed[x]) lv.push(x);
+      const pool = s.learn[i].map((id) => [id, b.w[id]]), sum = pool.reduce((a, [, w]) => a + w, 0);
+      return { lv, rows: [...pool.map(([id, w]) => [TR[id]?.name, w / (sum + 1)]), ['Nothing', 1 / (sum + 1)]] };
+    }).filter((d) => d.lv.length);
+    const r = magMax(draws.flatMap((d) => d.rows), ['p'], (x) => x[1]).p;
+    return sec('Birth', `<div class="box mp-one"><div class="lr-c">${s.startTechs.map((id) => TECH[id]).map((t) =>
+        `<span class="chip">${ico(t.icon, 'waza')}${esc(t.name)}</span>`).join('')}${s.traits.map(trChip).join('')}</div></div>`) +
+      (rows.length ? sec('Expedition levels', `<div class="box mp-one"><div class="lrows">${rows.join('')}</div></div>`) : '') +
+      draws.map((d) => sec(`Random trait · Lv ${lvRanges(d.lv)}`, `<div class="box mp-one"><div class="lodds">${d.rows.map(([n, p]) =>
+        `<span>${esc(n)}</span>${magBar(p, r, 'odds')}<b>${pct(p)}</b>`).join('')}</div></div>`)).join('');
+  };
+  const MON_VIEWS = { info: ['Info', monPage], learn: ['Learning', learnPage] };
+
   const BREED_VIEWS = {
     mons: { label: 'Monsters', body: (k) => `<div class="mlist">${members[k].map(monRow).join('')}</div>` },
     techs: {
@@ -209,7 +243,7 @@
     },
   };
 
-  const open = { breed: null, mon: null, cell: null, scroll: {} };
+  const open = { breed: null, mon: null, cell: null, scroll: {}, mscroll: {} };
   function showBreed() {
     const k = open.breed;
     if (k == null) { $('#overlay').hidden = true; document.body.style.overflow = ''; return; }
@@ -224,9 +258,11 @@
     }
     if (open.mon != null) {   // monster page: title = back to the breed, opens at the top
       $('#sheet-title').innerHTML = `<button class="mp-back" data-act="back">${esc(breedName(k))}</button>`;
-      $('#seg').innerHTML = '';
-      $('#sheet-body').innerHTML = monPage(open.mon);
-      $('#sheet-body').scrollTop = 0;
+      const mv = open.mon.learn && MON_VIEWS[st.mview] ? st.mview : 'info';
+      $('#seg').innerHTML = !open.mon.learn ? '' : Object.entries(MON_VIEWS).map(([x, [label]]) =>
+        `<button data-mview="${x}" class="${x === mv ? 'on' : ''}">${label}</button>`).join('');
+      $('#sheet-body').innerHTML = MON_VIEWS[mv][1](open.mon);
+      $('#sheet-body').scrollTop = open.mscroll?.[mv] || 0;
       $('#overlay').hidden = false;
       document.body.style.overflow = 'hidden';
       return;
@@ -250,7 +286,9 @@
     const g = m && m[1];
     open.breed = g === APE && members[APE] ? APE : g === SPECIAL && FEATURES.bosses ? SPECIAL : g && BR[g] ? +g : null;
     const sub = open.breed != null && m[2];
+    const prev = open.mon;
     open.mon = (sub === 'm' && members[open.breed].find((s) => s.id === +m[3])) || null;
+    if (open.mon !== prev) open.mscroll = {};
     open.cell = (sub === 's' && cellOf[open.breed + ':' + m[3]]) || null;
     showBreed();
   }
@@ -280,6 +318,11 @@
     if (e.target.closest('[data-act="back"]')) return back();
     const h = e.target.closest('[data-home]');
     if (h) { st.home = h.dataset.home; save(); renderHome(); return; }
+    const mv = e.target.closest('[data-mview]');
+    if (mv) {   // monster page Info | Learning: each side keeps its own scroll (rule A-no-scroll-reset)
+      open.mscroll[$('#seg .on')?.dataset.mview] = $('#sheet-body').scrollTop;
+      st.mview = mv.dataset.mview; save(); showBreed(); return;
+    }
     const v = e.target.closest('[data-view]');
     if (v) {
       open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;

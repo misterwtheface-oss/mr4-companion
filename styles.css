@@ -213,3 +213,12 @@ main.table { padding-bottom: 0; }
 .tr-t { border-top: 1px solid var(--line); }
 .tr-t summary { padding: 6px 10px; font-size: 12px; font-weight: 600; color: var(--gold); cursor: pointer; }
 .tr-t > div { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 10px 9px; }
+/* monster page, Learning side: birth chips, level rows (level | exp | technique / trait), random-trait odds */
+.lr-c { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 10px; }
+.lrows { display: grid; grid-template-columns: auto auto 1fr; gap: 5px 10px; align-items: center; padding: 8px 10px; }
+.lrows > i { font-style: normal; font-weight: 700; color: var(--gold); white-space: nowrap; }
+.lrows .lr-x { font-size: 11px; color: var(--dim); text-align: right; }
+.lrows > span:last-child, .lrows > span:nth-child(3n) { display: flex; flex-wrap: wrap; gap: 4px; }
+.lodds { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 8px; align-items: center; padding: 8px 10px; font-size: 13px; }
+.lodds > b { font-weight: 600; text-align: right; min-width: 4.5ch; }
+.bar.odds { --c: var(--gold); }
