@@ -83,6 +83,11 @@
   cell, gold outline = pure, "Evo" tag, count when a cell holds several. Emblem row / column stay pinned; scroll kept
   across switches. Tap = monster page; several = a list of just those (#b/<k>/s/<sub>). Routing now pushes history
   entries with their depth (history.state.d): Back / close / the "‹ breed" title return to wherever the page was opened.
+- 2026-11-10 (Guts Cost letter, user): the game has no letter for guts cost; ours = Life Damage's cut-offs placed at the
+  same points of the guts spread (guts and damage share range / mean / spread and correlate most, r 0.44; the four game
+  scales step ~7 points, Accuracy squeezed), read inverted (user: cheap = S, costly moves get a poor letter):
+  >= 49 E, 38-48 D, 30-37 C, 22-29 B, 15-21 A, < 15 S; over the 360 MR4 core techniques S..E = 34/59/78/76/70/43.
+  build_data.py GUTS_CUTS + tech_ranks() -> rank.guts; the bar stays magnitude (longer = costlier).
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.

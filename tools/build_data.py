@@ -177,6 +177,13 @@ def main():
     def waza_rank(col, v):   # DB_CsvFindRow: first row r with t[r+1][col] > v, else the last row; 0..5 = E..S
         c = wr["cols"].index(col)
         return next((r for r in range(len(wr["rows"]) - 1) if wr["rows"][r + 1][c] > v), len(wr["rows"]) - 1)
+    # Guts Cost has no letter in the game; ours (user 2026-11-10): Life Damage's cut-offs placed at the same points of the
+    # guts spread (its 11/29/49/72/88 % marks over the 360 MR4 core techniques; guts and damage share range, mean and
+    # spread and correlate most, r 0.44), read inverted so cheap = good: >= 49 E, 38 D, 30 C, 22 B, 15 A, < 15 S
+    GUTS_CUTS = [15, 22, 30, 38, 49]
+
+    def tech_ranks(t):
+        return {c: waza_rank(c, t[c]) for c in wr["cols"]} | {"guts": 5 - sum(t["guts"] >= x for x in GUTS_CUTS)}
     # Ape variants (Garu 0x1A + sub 0x23..0x25) use Garu's MONSKILL records but their own names (Mon_TechNameText:
     # msg 0xE3[0x22A + slot]) and pictures (last MON_WZP set, FUN_0028e938)
     msg_e3 = {e["i"]: e["text"] for e in
@@ -280,7 +287,7 @@ def main():
                                                   "damage", "withering", "heal", "followup", "element", "category")} |
                               {"range": t["range"] if t["range"] in ranges else None,
                                "effect": msg_db.get(0xAF + t["effect"]) if 0 <= t["effect"] < 0x22 else None,
-                               "rank": {c: waza_rank(c, t[c]) for c in wr["cols"]}, "nameApe": None,
+                               "rank": tech_ranks(t), "nameApe": None,
                                "icon": evo_waza(t), "iconApe": None, "origin": "evo"})
             continue
         r = sk.get((t["genus"], t["slot"]))
@@ -293,7 +300,7 @@ def main():
                           {"range": r.get("power_class") if r.get("power_class") in ranges else None,
                            # Mon info detail (FUN_0011c998): "Added Effects" = msg 0xDB[0xAF + effect_code] (< 0x22)
                            "effect": msg_db.get(0xAF + r["effect_code"]) if 0 <= r.get("effect_code", -1) < 0x22 else None,
-                           "rank": {c: waza_rank(c, t[c]) for c in wr["cols"]},
+                           "rank": tech_ranks(t),
                            "nameApe": msg_e3.get(0x22A + t["slot"]) if t["genus"] == 0x1A else None,
                            "icon": icon(ti["icon"]) if ti.get("icon") else None,
                            "iconApe": icon(ti["icon_ape"]) if ti.get("icon_ape") else None})

@@ -151,8 +151,8 @@
     return `<div class="box tcard"><div class="box-hl">${ico(t.icon, 'waza', t.name)}</div><b class="box-hr"><span class="tt bname">${esc(t.name)}</span></b>` +
       `<div class="box-l tc-l"><span class="tc-i">${ico(c?.icon, 'ico')}${ico(e?.icon, 'ico', e?.name)}</span>${type}${range}` +
       (t.effect && t.effect !== 'NONE' ? `<span class="tc-s">${esc(TX.effects)}<b>${esc(t.effect)}</b></span>` : '') + '</div>' +
-      // guts cost: own bar, no E..S letter in the game
-      `<div class="tc-r"><div class="rates"><i class="r-cost">Guts Cost</i>${magBar(t.guts, rateMax.guts, 'r-cost')}<b>${t.guts}</b><span></span>${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
+      // guts cost: own bar; the game has no letter for it, ours is built in build_data.py (GUTS_CUTS, cheap = S)
+      `<div class="tc-r"><div class="rates"><i class="r-cost">Guts Cost</i>${magBar(t.guts, rateMax.guts, 'r-cost')}<b>${t.guts}</b><img src="${RANK_IMG['EDCBAS'[t.rank.guts]]}" alt="${'EDCBAS'[t.rank.guts]}">${RATES.map(([k, label, cls]) => `<i class="${cls}">${label}</i>` +
         magBar(t[k], rateMax[k], cls) +
         `<b>${t[k]}</b><img src="${RANK_IMG['EDCBAS'[t.rank[k]]]}" alt="${'EDCBAS'[t.rank[k]]}">`).join('')}</div></div></div>`;
   };
