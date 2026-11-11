@@ -77,6 +77,12 @@
   cycle (removed). Page = hero box (emblems | name, Evo tag, type; big render; Book description), then Stats, Resists,
   Traits (one box each: name + the game's effect text; numeric trait effects still undecoded, backlog) and the full
   Starting Techniques boxes (same techRow as the Techniques tab). Stats panel shared by rows and page (app.js stats()).
+- 2026-11-10 (table, user-approved mockup): main page has a Breeds | Table switch (saved). Table = main (rows, the app's
+  groups: Ape row under Garu, since the game draws the 3 Apes with their own faces) x sub (columns: the breeds, then the
+  game's five "?" sub slots ?1..?5 = ids 33..37, then a plain "?" for the 7 Evo monsters with no sub); small render per
+  cell, gold outline = pure, "Evo" tag, count when a cell holds several. Emblem row / column stay pinned; scroll kept
+  across switches. Tap = monster page; several = a list of just those (#b/<k>/s/<sub>). Routing now pushes history
+  entries with their depth (history.state.d): Back / close / the "‹ breed" title return to wherever the page was opened.
 ## Open
 - Group skills (Counter, the breed's unique group attack, Tag Skill 1 / 2; slots 12+, no pictogram): user to decide
   where they go; hidden by FEATURES.groupSkills; turning it on puts them back on the core scale, so their new home needs its own scale.

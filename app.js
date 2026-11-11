@@ -40,8 +40,8 @@
 
   // ---- state (localStorage mr4c.state) ----
   const KEY = 'mr4c.state';
-  const st = Object.assign({ view: 'mons' }, JSON.parse(localStorage.getItem(KEY) || '{}'));
-  const save = () => localStorage.setItem(KEY, JSON.stringify({ view: st.view }));
+  const st = Object.assign({ view: 'mons', home: 'breeds' }, JSON.parse(localStorage.getItem(KEY) || '{}'));
+  const save = () => localStorage.setItem(KEY, JSON.stringify({ view: st.view, home: st.home }));
 
   // ---- shared pieces ----
   const monImg = (s, small) => s?.img.startsWith('render:')
@@ -59,13 +59,39 @@
 
   const typeBadge = (s) => MTYPE[s.type] ? `<span class="iv">${ico(MTYPE[s.type].icon, 'badge', MTYPE[s.type].name)}${esc(MTYPE[s.type].name)}</span>` : '';
 
-  // ---- main page: breed emblems ----
+  // ---- main page: Breeds (emblems) | Table (main x sub) ----
+  const homeGroups = BREEDS.flatMap((b) => (b.id === GARU && members[APE] ? [b.id, APE] : [b.id]));
+  const breedsHome = () => `<div class="emblems">${homeGroups.concat(FEATURES.bosses && members[SPECIAL] ? [SPECIAL] : []).map((k) =>
+    `<button class="emblem" data-breed="${k}">${emblem(groupIcon(k), breedName(k))}` +
+    `<b>${esc(breedName(k))}</b></button>`).join('')}</div>`;
+  // table (user 2026-11-10): rows = the app's groups (Ape after Garu: the game draws the Apes with their own faces), columns =
+  // sub breeds, then the game's five "?" sub slots (ids 33..37) and one plain "?" for Evo monsters with no sub; pure breeds
+  // on the diagonal; a cell with one monster opens its page, one with several opens a list of them
+  const QSUBS = [33, 34, 35, 36, 37], NOSUB = 'n';
+  const cellOf = {};
+  homeGroups.forEach((k) => members[k].forEach((s) => (cellOf[k + ':' + (s.sub ?? NOSUB)] ||= []).push(s)));
+  const tableCols = [...BREEDS.map((b) => ({ id: String(b.id), head: emblem(b.icon, b.name, 'emb sm') })),
+    ...QSUBS.map((id, i) => ({ id: String(id), head: `<span class="tq">?<sub>${i + 1}</sub></span>` })),
+    ...(homeGroups.some((k) => cellOf[k + ':' + NOSUB]) ? [{ id: NOSUB, head: '<span class="tq">?</span>' }] : [])];
+  const tableCell = (k, c) => {
+    const l = cellOf[k + ':' + c.id];
+    if (!l) return '<td></td>';
+    return `<td class="m${String(k) === c.id ? ' pure' : ''}${isEvo(l[0]) ? ' ev' : ''}" data-cell="${k}:${c.id}">${monImg(l[0], true)}` +
+      (l.length > 1 ? `<i class="n">${l.length}</i>` : '') + '</td>';
+  };
+  const tableHome = () => `<div class="tw"><table class="mt-t"><thead><tr><th class="corner"></th>${tableCols.map((c) => `<th>${c.head}</th>`).join('')}</tr></thead>` +
+    `<tbody>${homeGroups.map((k) => `<tr><th>${emblem(groupIcon(k), breedName(k), 'emb sm')}</th>${tableCols.map((c) => tableCell(k, c)).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const HOME_VIEWS = { breeds: ['Breeds', breedsHome], table: ['Table', tableHome] };
+  let tableScroll = null;   // kept across Breeds <-> Table switches (rule A-no-scroll-reset)
   function renderHome() {
-    const keys = BREEDS.flatMap((b) => (b.id === GARU && members[APE] ? [b.id, APE] : [b.id]))
-      .concat(FEATURES.bosses && members[SPECIAL] ? [SPECIAL] : []);
-    $('#view').innerHTML = `<div class="emblems">${keys.map((k) =>
-      `<button class="emblem" data-breed="${k}">${emblem(groupIcon(k), breedName(k))}` +
-      `<b>${esc(breedName(k))}</b></button>`).join('')}</div>`;
+    const tw = $('.tw');
+    if (tw) tableScroll = [tw.scrollLeft, tw.scrollTop];
+    if (!HOME_VIEWS[st.home]) st.home = 'breeds';
+    $('#view').innerHTML = `<div class="seg home">${Object.entries(HOME_VIEWS).map(([x, [label]]) =>
+      `<button data-home="${x}" class="${x === st.home ? 'on' : ''}">${label}</button>`).join('')}</div>` + HOME_VIEWS[st.home][1]();
+    $('#view').classList.toggle('table', st.home === 'table');
+    const t = $('.tw');
+    if (t && tableScroll) [t.scrollLeft, t.scrollTop] = tableScroll;
   }
 
   // ---- breed overlay ----
@@ -155,10 +181,19 @@
     },
   };
 
-  const open = { breed: null, mon: null, scroll: {} };
+  const open = { breed: null, mon: null, cell: null, scroll: {} };
   function showBreed() {
     const k = open.breed;
     if (k == null) { $('#overlay').hidden = true; document.body.style.overflow = ''; return; }
+    if (open.cell) {   // table cell with several monsters: just those
+      $('#sheet-title').textContent = breedName(k);
+      $('#seg').innerHTML = '';
+      $('#sheet-body').innerHTML = `<div class="mlist">${open.cell.map(monRow).join('')}</div>`;
+      $('#sheet-body').scrollTop = 0;
+      $('#overlay').hidden = false;
+      document.body.style.overflow = 'hidden';
+      return;
+    }
     if (open.mon != null) {   // monster page: title = back to the breed, opens at the top
       $('#sheet-title').innerHTML = `<button class="mp-back" data-act="back">${esc(breedName(k))}</button>`;
       $('#seg').innerHTML = '';
@@ -179,32 +214,44 @@
     document.body.style.overflow = 'hidden';
   }
 
-  // ---- routing: #b/<breed>[/m/<monster>] so the phone's Back button steps back (monster page -> breed -> main page) ----
-  let depth = 0;   // history entries this app pushed (0..2)
+  // ---- routing: #b/<breed>[/m/<monster> | /s/<sub>] so the phone's Back button steps back (monster page -> list ->
+  // main page); every entry the app pushes carries its depth (history.state.d) so close / back know how far to go
   function route() {
-    const m = location.hash.match(/^#b\/(\d+|x|ape)(?:\/m\/(\d+))?$/);
-    if (open.breed != null && open.mon == null) open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;
+    const m = location.hash.match(/^#b\/(\d+|x|ape)(?:\/(m|s)\/(\d+|n))?$/);
+    if (open.breed != null && open.mon == null && !open.cell) open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;
     const g = m && m[1];
     open.breed = g === APE && members[APE] ? APE : g === SPECIAL && FEATURES.bosses ? SPECIAL : g && BR[g] ? +g : null;
-    open.mon = (open.breed != null && m[2] && members[open.breed].find((s) => s.id === +m[2])) || null;
-    depth = Math.min(depth, open.mon ? 2 : open.breed != null ? 1 : 0);
+    const sub = open.breed != null && m[2];
+    open.mon = (sub === 'm' && members[open.breed].find((s) => s.id === +m[3])) || null;
+    open.cell = (sub === 's' && cellOf[open.breed + ':' + m[3]]) || null;
     showBreed();
   }
-  const go = (hash) => {   // to a shallower level: Back through our own entries, else replace
-    const up = depth - (hash ? (hash.includes('/m/') ? 2 : 1) : 0);
-    if (up > 0 && depth >= up) return history.go(-up);   // hashchange -> route()
-    history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
+  const depth = () => history.state?.d || 0;
+  const nav = (hash) => { history.pushState({ d: depth() + 1 }, '', '#' + hash); route(); };
+  const close = () => {
+    if (depth() > 0) return history.go(-depth());   // popstate -> route()
+    history.replaceState(null, '', location.pathname + location.search);
     route();
   };
-  const close = () => go('');
-  const back = () => go('b/' + open.breed);
+  const back = () => {   // monster page -> where it was opened from (its breed list on a direct link)
+    if (depth() > 1) return history.back();
+    history.replaceState(history.state, '', '#b/' + open.breed);
+    route();
+  };
 
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-breed]');
-    if (b) { depth = 1; location.hash = 'b/' + b.dataset.breed; return; }
+    if (b) return nav('b/' + b.dataset.breed);
+    const c = e.target.closest('[data-cell]');
+    if (c) {
+      const [k, sub] = c.dataset.cell.split(':'), l = cellOf[c.dataset.cell];
+      return nav(l.length > 1 ? `b/${k}/s/${sub}` : `b/${k}/m/${l[0].id}`);
+    }
     const mr = e.target.closest('[data-mon]');
-    if (mr) { depth++; location.hash = `b/${open.breed}/m/${mr.dataset.mon}`; return; }
+    if (mr) return nav(`b/${open.breed}/m/${mr.dataset.mon}`);
     if (e.target.closest('[data-act="back"]')) return back();
+    const h = e.target.closest('[data-home]');
+    if (h) { st.home = h.dataset.home; save(); renderHome(); return; }
     const v = e.target.closest('[data-view]');
     if (v) {
       open.scroll[open.breed + st.view] = $('#sheet-body').scrollTop;
@@ -213,7 +260,7 @@
     if (e.target.closest('[data-act="close"]') || e.target.id === 'overlay') close();
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open.breed != null) (open.mon ? back() : close()); });
-  window.addEventListener('hashchange', route);
+  window.addEventListener('popstate', route);
 
   renderHome();
   route();
